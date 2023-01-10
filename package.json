@@ -1,12 +1,12 @@
 {
   "name": "manage_data_for_datim",
   "short_name": "Manage Data for DATIM",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "DHIS2 WebApp to manage data for DATIM",
   "author": "alex_tumwesigye@ug.jsi.com",
   "private": true,
   "dependencies": {
-    "@dhis2/app-runtime": "^2.8.0",
+    "@dhis2/app-runtime": "^3.7.0",
     "@dhis2/d2-i18n": "^1.0.6",
     "@dhis2/ui": "^6.9.1",
     "@material-ui/core": "^4.9.12",

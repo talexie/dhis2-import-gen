@@ -19,8 +19,7 @@ export const AnalyticsList = ({ selected,ts,ds,config }) => {
     const dimension = !isEmpty(selected)?selected[0].dimensions:undefined;
     const ou = !isEmpty(selected)?getSelectedOrgUnit(selected[0].orgUnit):undefined;
     const report = !isEmpty(selected)?selected[0].report:undefined;
-    const fetchData = useCallback(async()=>{    
-        //const rsKeys = ['datimUid','datimCode','datimDisaggregationUid','sex','ageGroup','echoIndicatorUid','echoIndictorName','defaultUid','echoSexUid','echoAgeGroupUid','lessThan15AndAbove15Uid'];                   
+    const fetchData = useCallback(async()=>{                       
         if(report?.key === 'hfr'){
             const items = getUniqArray(getIndicatorDimensions(report?.dataGroups,'id'));
             setIndicators(items);
@@ -55,7 +54,6 @@ export const AnalyticsList = ({ selected,ts,ds,config }) => {
                 else{
                     defaultMap=filterMap(ds,false,'defaultUid');
                 }
-                //const mapTs = getMappedKeys(ds,rsKeys);
                 setMapping(defaultMap);
                 const defaultInd = getUniqArray(getValues(defaultMap,'echoIndicatorUid'));
                 setIndicators(defaultInd);

@@ -1,9 +1,11 @@
 import React, { useCallback } from 'react'
 import useSWR from 'swr';
+//import { useQueries } from '@tanstack/react-query';
 import { DisplayTable } from './DisplayTable';
 import { makeStyles } from '@material-ui/styles';
 import isEmpty from 'lodash/isEmpty';
 import { useConfig } from '@dhis2/app-runtime';
+//import { defaultQueryFn } from './App';
 import { 
     createDataMap,
     getUniqArray,
@@ -47,6 +49,10 @@ const getReportHeaders =(headers,field='field')=>{
     }
 }
 
+const fetcher = (...urls) => {
+    const f = url => fetch(url).then(r => r.json())
+    return Promise.all(urls.map(url => f(url)))
+}
 /**
  * Component to Generate Data Import Table
  */
@@ -61,9 +67,25 @@ export const AnalyticsData = ({ pe,ou,dimension,ts,indicators,mapping,report }) 
     const filterMechanism = getFilterMechanism(report);
     const mechanism = report?.mechanism; 
     const levels = report?.levels;
-    const query = !isEmpty(pe) && !isEmpty(ou) && !isEmpty(indicators)?`${baseUrl}/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:LEVEL-6;${ou?.join(';')}&dimension=dx:${ indicators?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null;     
-    const { data } = useSWR(query);
-               
+    const query = !isEmpty(pe) && !isEmpty(ou) && !isEmpty(indicators)?`${baseUrl}/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:LEVEL-6;${ou?.join(';')}&dimension=dx:${ indicators?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null; 
+    const chunkQuery =(q)=>!isEmpty(pe) && !isEmpty(ou) && !isEmpty(q)?`/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:LEVEL-6;${ou?.join(';')}&dimension=dx:${ q?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null;     
+
+    const chunkedIndicators = chunk(indicators??[],5);
+    /*const userQueries = useQueries({
+        queries: chunkedIndicators.map((chunkedInd) => {
+            const chunked = chunkQuery(chunkedInd);
+            return {
+                queryKey: [chunked],
+                //queryFn: ()=> defaultQueryFn(chunked),
+                enabled: !chunked
+            }
+        }),
+    });
+    console.log("Parallel data:",userQueries);*/
+    const urls = chunkedIndicators.map((chunkedInd)=>chunkQuery(chunkedInd));
+    const { data, error } = useSWR(urls, fetcher);
+    console.log("Parallel data:",data);
+    //const { data } = useSWR(query);       
     const fetchData = useCallback(async()=>{
         setLoading(true); 
         let keys = ['datimId','datimName','District','Province','datimUid','datimCode','datimDisaggregationUid','datimDisaggregation','sex','ageGroup','lessThan15AndAbove15','echoIndicatorUid','echoIndicatorName','mechanism','frequency']; 
