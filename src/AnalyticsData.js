@@ -12,6 +12,7 @@ import {
     getCategoryDimensions,
     uniqueData,
 } from './Utils';
+import chunk from 'lodash/chunk';
 
 const useStyles = makeStyles({
     root: {
@@ -68,7 +69,7 @@ export const AnalyticsData = ({ pe,ou,dimension,ts,indicators,mapping,report }) 
     const mechanism = report?.mechanism; 
     const levels = report?.levels;
     const query = !isEmpty(pe) && !isEmpty(ou) && !isEmpty(indicators)?`${baseUrl}/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:LEVEL-6;${ou?.join(';')}&dimension=dx:${ indicators?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null; 
-    const chunkQuery =(q)=>!isEmpty(pe) && !isEmpty(ou) && !isEmpty(q)?`/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:LEVEL-6;${ou?.join(';')}&dimension=dx:${ q?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null;     
+    const chunkQuery =(q)=>!isEmpty(pe) && !isEmpty(ou) && !isEmpty(q)?`/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:OU_GROUP-dUBw75sMCZR&dimension=dx:${ q?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null;     
 
     const chunkedIndicators = chunk(indicators??[],5);
     /*const userQueries = useQueries({

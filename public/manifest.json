@@ -1,5 +1,6 @@
 {
-  "short_name": "Manage Data for DATIM",
+  "appType": "APP",
+  "short_name": "manage-data-for-datim",
   "name": "Manage Data for DATIM",
   "version":"0.1.7",
   "icons": [

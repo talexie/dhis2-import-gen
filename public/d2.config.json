@@ -1,0 +1,10 @@
+{
+  "type": "app",
+  "name": "manage-data-for-datim",
+  "title": "Manage Data for DATIM",
+  "version": "0.1.7",
+  "author": {
+    "name": "alex_tumwesigye@ug.jsi.com"
+  },
+  "description": "DHIS2 WebApp to manage data for DATIM"
+}
