@@ -16,7 +16,6 @@ import omit from 'lodash/omit';
 import isPlainObject from 'lodash/isPlainObject';
 import startCase from 'lodash/startCase';
 import { exportDataToExcel } from './Utils';
-import { exportCsv } from './exportFile';
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),

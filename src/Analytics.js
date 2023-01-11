@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/styles';
 import { useDataQuery } from '@dhis2/app-runtime'
 import { AnalyticsHeader } from './AnalyticsHeader';
 import { AnalyticsList } from './AnalyticsList';
-//import i18n from '@dhis2/d2-i18n';
 
 const useStyles = makeStyles({
     root: {

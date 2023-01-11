@@ -1,12 +1,11 @@
 import React from 'react'
 import { OrgUnitTree } from './ouTree';
-import Grid from '@material-ui/core/Grid';
+import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PeriodField } from './forms/PeriodField';
 import { Button } from '@dhis2/ui';
 import sortBy from 'lodash/sortBy';
 import { generatePeriods, periodTypes } from './Period';
-import { remapData } from './forms/Helpers';
 
 //import i18n from '@dhis2/d2-i18n';
 
@@ -84,37 +83,39 @@ export const AnalyticsHeader = ({ getUpdate,config }) => {
     }
     return (
         <Grid container className={ classes.root } direction= { 'column' } spacing={ 2 }>
-            <Grid item>
+            <Grid item xs>
                 <h3>DATIM Import File Generator</h3>
             </Grid>            
-            <Grid item container justifyContent={ 'flex-start' } spacing={ 8 } className={ classes.orgUnit }>
-                <Grid item>
+            <Grid item xs container justifyContent={ 'flex-start' } spacing={ 8 } className={ classes.orgUnit }>
+                <Grid item xs>
                     <OrgUnitTree                      
                       getSelected = { getOrgUnit }
                       multiSelect = { false }
                     />
                 </Grid>
-                <Grid item>
-                    <PeriodField
-                        data ={ sortBy(periodTypes,'label') }
-                        placeholder= { `Select Period Type` }
-                        onChange = { onChangePeriodType }
-                        selected = { periodType }
-                        singleSelect = { true }
-                        input = { periodType }
-                        
-                    />
+                <Grid item xs container justifyContent={ 'flex-start' } spacing={ 2 }>
+                        <Grid item xs>
+                            <PeriodField
+                                data ={ sortBy(periodTypes,'label') }
+                                placeholder= { `Select Period Type` }
+                                onChange = { onChangePeriodType }
+                                selected = { periodType }
+                                singleSelect = { true }
+                                input = { periodType }
+                                
+                            />
+                        </Grid>
+                        <Grid item xs>
+                            <PeriodField
+                                className = { classes.orgUnit }
+                                data ={ sortBy(periods,"value") }
+                                placeholder= { `Select Period` }
+                                onChange = { onChangePeriod }
+                                selected = { period }
+                            />
+                        </Grid>
                 </Grid>
-                <Grid item>
-                    <PeriodField
-                        className = { classes.orgUnit }
-                        data ={ sortBy(periods,"value") }
-                        placeholder= { `Select Period` }
-                        onChange = { onChangePeriod }
-                        selected = { period }
-                    />
-                </Grid>
-                <Grid item>
+                <Grid item xs>
                     <PeriodField
                         className = { classes.orgUnit }
                         data ={ sortBy(dimensions,'name') }
@@ -124,7 +125,7 @@ export const AnalyticsHeader = ({ getUpdate,config }) => {
                         singleSelect = { true }
                     />
                 </Grid>
-                <Grid item>
+                <Grid item xs>
                     <PeriodField
                         className = { classes.orgUnit }
                         data ={ sortBy(reports,'name') }
@@ -134,18 +135,17 @@ export const AnalyticsHeader = ({ getUpdate,config }) => {
                         singleSelect = { true }
                     />
                 </Grid>
-                <Grid item>
-                <Button
-                    dataTest="dhis2-uicore-button"
-                    name="Button"
-                    onClick={ update }
-                    type="button"
-                    value="default"
-                    >
-                    Update
+                <Grid item xs>
+                    <Button
+                        dataTest="dhis2-uicore-button"
+                        name="Button"
+                        onClick={ update }
+                        type="button"
+                        value="default"
+                        >
+                        Update
                     </Button>
                 </Grid>
-                
             </Grid>
         </Grid>
     )

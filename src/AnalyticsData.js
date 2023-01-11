@@ -13,6 +13,11 @@ import {
     uniqueData,
 } from './Utils';
 import chunk from 'lodash/chunk';
+import merge from 'lodash/merge';
+import omit from 'lodash/omit';
+import * as qs from 'qs';
+import set from 'lodash/set';
+import get from 'lodash/get';
 
 const useStyles = makeStyles({
     root: {
@@ -49,15 +54,40 @@ const getReportHeaders =(headers,field='field')=>{
         return [];
     }
 }
-
-const fetcher = (...urls) => {
+/**
+ * Merge DHIS2 analytics data from parallel fetches
+ */
+export const mergeDhis2AnalyticsData =(data)=>{
+    const mergedData = {
+        headerWidth:0,
+        headers:[],
+        metaData:{},
+        width:0,
+        height:0,
+        rows:[]
+    };
+    return data?.reduce((acc,d,index)=>{
+        if (index === 0) {
+            acc = merge(mergedData,omit(d,['rows']));
+        }
+        set(acc,'height',(get(acc, 'height') ?? 0 + get(d, 'height') ?? 0));
+        const currentData = get(acc, 'rows') ?? [];
+        const newData = get(d, 'rows') ?? [];
+        set(acc, 'rows', currentData.concat(newData));
+        return acc;
+    },mergedData);
+}
+/**
+ * Create parallel fetch calls
+ */
+export const fetcher = (...urls) => {
     const f = url => fetch(url).then(r => r.json())
     return Promise.all(urls.map(url => f(url)))
 }
 /**
  * Component to Generate Data Import Table
  */
-export const AnalyticsData = ({ pe,ou,dimension,ts,indicators,mapping,report }) => {    
+export const AnalyticsData = ({ pe,ou,dimension,ts,indicators,mapping,report,config }) => {    
     const classes = useStyles();
     const { baseUrl } = useConfig();
     const [tableData,setTableData] = React.useState([]);
@@ -68,10 +98,25 @@ export const AnalyticsData = ({ pe,ou,dimension,ts,indicators,mapping,report }) 
     const filterMechanism = getFilterMechanism(report);
     const mechanism = report?.mechanism; 
     const levels = report?.levels;
-    const query = !isEmpty(pe) && !isEmpty(ou) && !isEmpty(indicators)?`${baseUrl}/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:LEVEL-6;${ou?.join(';')}&dimension=dx:${ indicators?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null; 
-    const chunkQuery =(q)=>!isEmpty(pe) && !isEmpty(ou) && !isEmpty(q)?`/api/analytics.json?dimension=pe:${pe?.join(';')}${isEmpty(dim)?'':'&'}${dim?.join('&')}&dimension=ou:OU_GROUP-dUBw75sMCZR&dimension=dx:${ q?.join(';')}&filter=${filterMechanism}&displayProperty=NAME&hierarchyMeta=true&showHierarchy=true&hideEmptyRows=true&hideEmptyColumns=true`:null;     
-
-    const chunkedIndicators = chunk(indicators??[],5);
+    const catOptionFilter = isEmpty(dim)?[]:dim;
+    const qsQuery =(q)=> qs.stringify({
+        dimension:[
+            `pe:${pe?.join(';')}`,
+            `ou:OU_GROUP-dUBw75sMCZR`,
+            `dx:${ q?.join(';')}`
+        ].concat(catOptionFilter),
+        filter: filterMechanism,
+        displayProperty:`NAME`,
+        hierarchyMeta:true,
+        showHierarchy:true,
+        hideEmptyRows:true,
+        hideEmptyColumns:true
+    },{ 
+        indices: false,
+        skipNulls: true 
+    }); 
+    const chunkQuery =(q)=>!isEmpty(pe) && !isEmpty(q)?`${baseUrl}/api/analytics.json?${qsQuery(q)}`:null;   
+    const chunkedIndicators = chunk(indicators??[],config?.chunks??3);
     /*const userQueries = useQueries({
         queries: chunkedIndicators.map((chunkedInd) => {
             const chunked = chunkQuery(chunkedInd);
@@ -83,20 +128,19 @@ export const AnalyticsData = ({ pe,ou,dimension,ts,indicators,mapping,report }) 
         }),
     });
     console.log("Parallel data:",userQueries);*/
-    const urls = chunkedIndicators.map((chunkedInd)=>chunkQuery(chunkedInd));
-    const { data, error } = useSWR(urls, fetcher);
-    console.log("Parallel data:",data);
-    //const { data } = useSWR(query);       
+    const urls = chunkedIndicators.map((chunkedInd)=>chunkQuery(chunkedInd)).filter(Boolean).filter(String);
+    const { data } = useSWR(isEmpty(urls)?null:urls, fetcher);     
     const fetchData = useCallback(async()=>{
         setLoading(true); 
         let keys = ['datimId','datimName','District','Province','datimUid','datimCode','datimDisaggregationUid','datimDisaggregation','sex','ageGroup','lessThan15AndAbove15','echoIndicatorUid','echoIndicatorName','mechanism','frequency']; 
-        if(report?.key === 'hfr'){
-            keys = getReportHeaders(report?.headers)??[];
-        } 
+
         if(data){ 
+            if(report?.key === 'hfr'){
+                keys = getReportHeaders(report?.headers)??[];
+            } 
             /** To Do, create a dropdown to allow choice of mapping data e.g Fy20, FY21, FY22 */ 
-            const mappingPeriod = 'FY22';  
-            const tsMapped = createDataMap(data,keys,ts,mapping,levels,mappingPeriod,report?.location,report?.indicator);
+            const mappingPeriod = config?.financialYear??'FY22';  
+            const tsMapped = createDataMap(mergeDhis2AnalyticsData(data),keys,ts,mapping,levels,mappingPeriod,report?.location,report?.indicator);
             const dataRows = tsMapped?.data?.map((r)=>{
                 return {
                     ...r,

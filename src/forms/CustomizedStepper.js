@@ -146,7 +146,7 @@ const  getSteps=(route)=> {
 }
 
 const GetStepContent =(props)=>{
-  const { step, getData,route,type } = props; 
+  const { step, getData,route } = props; 
   const { pathname } = route;
   switch (step) {
     case 0:

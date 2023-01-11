@@ -88,7 +88,7 @@ export const getCategoryDimensions =(category)=>{
             const dimension = cat?.[key]?.map((option)=>{
                 return option?.id;
             }).filter(Boolean).filter(String);
-            return `dimension=${cat?.id}:${dimension?.join(';')}`;
+            return `${cat?.id}:${dimension?.join(';')}`;
         }).filter(Boolean).filter(String)
     }
     else{
