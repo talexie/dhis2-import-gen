@@ -1,6 +1,6 @@
 //import * as path from 'path';
 import react from '@vitejs/plugin-react';
-import { build, defineConfig } from 'vite';
+import { defineConfig } from 'vite';
 import zipPack from "vite-plugin-zip-pack";
 //import { VitePWA } from 'vite-plugin-pwa';
 

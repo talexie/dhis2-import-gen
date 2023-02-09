@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, size, uniqBy, chunk } from 'lodash';
 import { 
     aiGetDataFrame,
     aiGetColumns,
@@ -12,33 +12,36 @@ import {
     aiAddColumn,
     aiSelectByDropColumns,
     mergeColumnsAndData,
-    aiShowData
+    nativeMerge,
 } from './utils';
+//import { exposeWorker } from 'react-hooks-worker';
 
-
-export const getDataTable = (
-    ts,
-    data,
-    mapping,
-    levels,
-    mechanism,
-    key
-)=>{
+export const getDataTable = (props)=>{
+    const {
+        ts,
+        data,
+        mapping,
+        levels,
+        mechanism,
+        key
+    } = props;
     // Start of ML 
-    const dataSet = JSON.parse(data);
-    
+    const dataSet = JSON.parse(data??'[]');
     let loading = true;
+    const start= performance.now();
     if(dataSet?.rows && !isEmpty(dataSet?.rows)){
+        //const chunks = chunk(dataSetFetched?.rows,100000);
+        //chunks?.forEach((dataSet,i)=>{
         const dataColumns = getDataColumns(dataSet?.headers);
         const addColumnsToData = mergeColumnsAndData(dataSet?.rows,dataColumns) 
         const ouNameHierarchy = getOuNameHierarchy(dataSet?.metaData?.ouNameHierarchy);
         const aiData = aiGetDataFrame(addColumnsToData);
         const aiOuHierarchy = aiGetDataFrame(ouNameHierarchy);
         
-        const aiOuHierarchyRename = renameDataColumns(aiOuHierarchy,getOuLevelColumns(JSON.parse(levels)));
+        const aiOuHierarchyRename = renameDataColumns(aiOuHierarchy,getOuLevelColumns(JSON.parse(levels??'[]')));
 
         const mappingDs = aiGetDataFrame(JSON.parse(mapping));
-        const aiTs = aiGetDataFrame(JSON.parse(ts)); //use ts
+        const aiTs = aiGetDataFrame(JSON.parse(ts??'[]')); //use ts
         const aiTsRenamed = renameDataColumns(aiTs,[
             {
                 old: "id", 
@@ -84,22 +87,29 @@ export const getDataTable = (
         let aiMergeTsDataMech = null;
         switch (key){
             case 'gender':
-                aiMergeTsDataMech = aiMergedDataSets(renamed,mappingDs,['EchoIndicatorID','EchoGenderCatOptionUid'],'left');
+                const mergeGender = nativeMerge(renamed?renamed.toCollection():[],mappingDs?mappingDs.toCollection():[],['EchoIndicatorID','EchoGenderCatOptionUid'])
+                aiMergeTsDataMech = aiGetDataFrame(mergeGender);
                 break;
             case 'ageGroup':
-                aiMergeTsDataMech = aiMergedDataSets(renamed,mappingDs,['EchoIndicatorID','EchoAgeGroupCatOptionUid'],'left');
+                const mergeAgeGroup = nativeMerge(renamed?renamed.toCollection():[],mappingDs?mappingDs.toCollection():[],['EchoIndicatorID','EchoAgeGroupCatOptionUid'])
+                aiMergeTsDataMech = aiGetDataFrame(mergeAgeGroup);
                 break;
             case 'genderAgeGroup':
-                aiMergeTsDataMech = aiMergedDataSets(renamed,mappingDs,['EchoIndicatorID','EchoGenderCatOptionUid','EchoAgeGroupCatOptionUid'],'left');
+                const mergeGengerAgeGroup = nativeMerge(renamed?renamed.toCollection():[],mappingDs?mappingDs.toCollection():[],['EchoIndicatorID','EchoGenderCatOptionUid','EchoAgeGroupCatOptionUid'])
+                aiMergeTsDataMech = aiGetDataFrame(mergeGengerAgeGroup);
                 break;
             case 'lessThan15AndAbove15':
-                aiMergeTsDataMech = aiMergedDataSets(renamed,mappingDs,['EchoIndicatorID','EchoAgeGroupCatOptionUid'],'left');
+                const mergeLessThan15AndAbove15 = nativeMerge(renamed?renamed.toCollection():[],mappingDs?mappingDs.toCollection():[],['EchoIndicatorID','EchoAgeGroupLessThan15AndAbove15Uid'])
+                aiMergeTsDataMech = aiGetDataFrame(mergeLessThan15AndAbove15);
                 break;
             case 'lessThan15AndAbove15AndGender':
-                aiMergeTsDataMech = aiMergedDataSets(renamed,mappingDs,['EchoIndicatorID','EchoGenderCatOptionUid','EchoAgeGroupLessThan15AndAbove15Uid'],'left');
+                const mergeLessThan15AndAbove15AndGender = nativeMerge(renamed?renamed.toCollection():[],mappingDs?mappingDs.toCollection():[],['EchoIndicatorID','EchoGenderCatOptionUid','EchoAgeGroupLessThan15AndAbove15Uid'])
+                aiMergeTsDataMech = aiGetDataFrame(mergeLessThan15AndAbove15AndGender);
+
                 break;
             default:
-                aiMergeTsDataMech = aiMergedDataSets(renamed,mappingDs,['EchoIndicatorID'],'left');
+                const mergeDefault = nativeMerge(renamed?renamed.toCollection():[],mappingDs?mappingDs.toCollection():[],['EchoIndicatorID'])
+                aiMergeTsDataMech = aiGetDataFrame(mergeDefault);
                 
         }        
         // Add mechanism
@@ -108,22 +118,20 @@ export const getDataTable = (
             (row,i)=>row.set('id',i+1)
         ):null,['id','EchoIndicatorID','Period','EchoOrgUnit','Value','datimId','datimUid','datimDisaggregationUid','Mechanism','level4','level5','level6']);
         const aiColumns = createMoreColumns([],aiGetColumns(aiMergeTsData));
-        loading = false;
         // End of ML analysis
-
+        const end= performance.now();
+        console.log("ML Took:", (end-start)/1000);
         return JSON.stringify({
-            loading: loading,
+            loading: false,
             data: aiMergeTsData?aiMergeTsData.toCollection():[],
             columns: aiColumns
-        })
+        });
     }
-    else{
-        return(JSON.stringify({
-            loading: false,
-            data: [],
-            columns: []
-        }));
-    }
+    return JSON.stringify({
+        loading: loading,
+        data: [],
+        columns: []
+    })
 }
 
 
@@ -131,3 +139,4 @@ export const performCalculation =(data)=> {
     console.log(`Worker lives!:`,data);
     return data;
 }  
+//exposeWorker(getDataTable);

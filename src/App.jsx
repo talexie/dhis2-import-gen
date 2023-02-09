@@ -5,6 +5,7 @@ import {
   } from './analytics';
   import {
     ManageIndicatorMapping,
+    ManageMer,
     ManageOrgUnitMapping
   } from './mappings';
   import { Setup } from './manage';
@@ -61,6 +62,12 @@ export const routes = [
           label: "Setup",
           path: "/setup",
           element: <Setup/>
+        },
+        {
+          label: "SMARTCARE",
+          path: "/upload",
+          element: <ManageMer/>,
+          userGroup: "SMARTCARE_UPLOAD"
         }
       ]
     }

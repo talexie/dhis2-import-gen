@@ -1,5 +1,5 @@
 import { aiRenameLabels } from "./Ml";
-import { merge, get, set, omit, size } from 'lodash';
+import { merge, get, set, omit, size,map,find } from 'lodash';
 
 /**
  * Extract columns from headers.
@@ -65,14 +65,13 @@ export const getOuNameHierarchy =(ouNames)=>{
  */
 export const getOuLevelColumns =(levels)=>{
     return levels?.map((level)=>({ 
-        old:[`level${level?.level}`],
-        new: level?.name??level?.displayName
+        [`level${level?.level}`]: level?.name??level?.displayName
     }));
 }
 /**
  * Merge DHIS2 analytics data from parallel fetches
  */
-export const mergeDhis2AnalyticsData =(data)=>{
+export const useMergeDhis2AnalyticsData =(data)=>{
     const mergedData = {
         headerWidth:0,
         headers:[],
@@ -82,8 +81,7 @@ export const mergeDhis2AnalyticsData =(data)=>{
         rows:[],
         
     };
-    let loading = size(data) && Array.isArray(data)?true: false;
-    
+    let loading = true;
     return {
         data: JSON.stringify(Array.isArray(data)? data?.reduce((acc,d,index)=>{
             if (index === 0) {
@@ -96,7 +94,7 @@ export const mergeDhis2AnalyticsData =(data)=>{
             loading = ((index + 1)=== size(data))?d?.isLoading: true;
             return acc;
         },mergedData):[]),
-        loading: loading
+        loading: data?.every((x)=>x?.isLoading)
     }
 }
 /**
@@ -119,3 +117,95 @@ export const mergeColumnsAndData =(data=[],columns=[])=>{
         return  newObj;
     });
 }
+/**
+ * Merge two JSON array objects
+ * @param {*} left 
+ * @param {*} right 
+ * @param {*} keys 
+ * @returns 
+ */
+
+export const nativeMerge =(left=[],right=[],keys=[])=>{
+    return map(left,(l)=>{ 
+        const innerRow = find(right,(r)=>{
+            const check = keys?.reduce((acc,k)=>{
+                const accTest = acc && (get(r,k) === get(l,k));
+                return accTest;
+            },true);
+             return check;
+        });
+        return merge(l,innerRow); 
+    })
+}
+/**
+ * Rename columns names
+ * @param {*} data 
+ * @param {*} columns 
+ * @returns 
+ */
+export const nativeRenameLabels = (data,columns=[])=>{
+    return map(data,(d)=>{
+        columns?.forEach((c)=>{
+            set(d,c?.new,get(d,c?.old));
+            delete d?.[c?.old];
+        });
+        return d;
+    })
+}
+/**
+ * Drop columns names
+ * @param {*} data 
+ * @param {*} columns 
+ * @returns 
+ */
+export const nativeDropLabels = (data,columns=[])=>{
+    return map(data,(d)=>{
+        columns?.forEach((c)=>{
+            delete d?.[c?.old];
+        });
+        return d;
+    })
+}
+/**
+ * 
+ * @param {*} lookupTable 
+ * @param {*} mainTable 
+ * @param {*} lookupKey 
+ * @param {*} mainKey 
+ * @param {*} select 
+ * @returns 
+ * @example
+ * var result = join(brands, articles, "id", "brand_id", function(article, brand) {
+    return {
+        id: article.id,
+        name: article.name,
+        weight: article.weight,
+        price: article.price,
+        brand: (brand !== undefined) ? brand.name : null
+    };
+}); 
+ */
+export const join =(lookupTable, mainTable, lookupKey, mainKey, select)=> {
+    var l = lookupTable.length,
+        m = mainTable.length,
+        lookupIndex = [],
+        output = [];
+    for (var i = 0; i < l; i++) { // loop through l items
+        var row = lookupTable[i];
+        lookupIndex[row[lookupKey]] = row; // create an index for lookup table
+    }
+    for (var j = 0; j < m; j++) { // loop through m items
+        var y = mainTable[j];
+        var x = lookupIndex[y[mainKey]]; // get corresponding row from lookupTable
+        output.push(select(y, x)); // select only the columns you need
+    }
+    return output;
+};
+/*
+const equijoin = (xs, ys, primary, foreign, sel) => {
+    const ix = xs.reduce((ix, row) => ix.set(row[primary], row), new Map);
+    return ys.map(row => sel(ix.get(row[foreign]), row));
+};
+onst result = equijoin(userProfiles, questions, "id", "createdBy",
+    ({name}, {id, text}) => ({id, text, name}));
+*/

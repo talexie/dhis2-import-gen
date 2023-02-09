@@ -4,69 +4,79 @@ import {
     aiGetDataFrame,
     renameDataColumns,
     aiGetUniqueInColumn,
+    aiReplaceNull,
 } from '../utils';
+import filter from 'lodash/filter';
 
-export const getFilteredMapping = (aiDs,dimension,config)=>{
-
+export const getFilteredMapping = (aiDs,dimension,config,report)=>{
+    const frequency = report?.frequency?.toUpperCase();
     // For each dimension, filter out from DS data and do the merge
         // Gender and Age only // EQUAL TO defaultMap below
         // Filter by Gender
         if(dimension?.key === 'gender'){
-            return aiDs.chain(
-                //row => row.get([config?.financialYear??'FY22']) === true,
-                row => row.get("echoSexUid") !== null,
-                row => row.get("echoAgeGroupUid") === null,
-                row => row.get("lessThan15AndAbove15Uid") === null
+            return filter(aiDs,
+                (o)=>(
+                    [config?.financialYear??'FY22'] && o?.lessThan15AndAbove15Uid === "NULL_OR_UNDEFINED" && o?.defaultUid === "NULL_OR_UNDEFINED" && o?.frequency === frequency && o?.echoSexUid !=="NULL_OR_UNDEFINED" && o?.echoAgeGroupUid === "NULL_OR_UNDEFINED"
+                ) 
             )
         }
         // Filter by Age Group
         else if(dimension?.key === 'ageGroup'){
-            return aiDs.chain(
-                //row => row.get([config?.financialYear??'FY22']) === true,
-                row => row.get("echoAgeGroupUid") !== null,
-                row => row.get("echoSexUid") === null
-                
+            return filter(aiDs,
+                (o)=>(
+                    [config?.financialYear??'FY22'] && o?.lessThan15AndAbove15Uid === "NULL_OR_UNDEFINED" && o?.defaultUid === "NULL_OR_UNDEFINED" && o?.frequency === frequency && o?.echoSexUid ==="NULL_OR_UNDEFINED" && o?.echoAgeGroupUid !== "NULL_OR_UNDEFINED"
+                )   
             )
         }
         // Filter by Gender and Age Group
         else if(dimension?.key === 'genderAgeGroup'){
-            return aiDs.chain(
-                //row => row.get([config?.financialYear??'FY22']) === true,
-                row => row.get("echoAgeGroupUid") !== null,
-                row => row.get("echoSexUid") !== null               
+            return filter(
+                aiDs,
+                (o)=>(
+                    [config?.financialYear??'FY22'] && o?.lessThan15AndAbove15Uid === "NULL_OR_UNDEFINED" && o?.defaultUid === "NULL_OR_UNDEFINED" && o?.frequency === frequency && o?.echoSexUid !=="NULL_OR_UNDEFINED" && o?.echoAgeGroupUid !== "NULL_OR_UNDEFINED"
+                )           
             )
         }
         // Filter by <15 and 15+
         else if(dimension?.key === 'lessThan15AndAbove15'){
-            return aiDs.chain(
-                //row => row.get([config?.financialYear??'FY22']) === true,
-                row => row.get("lessThan15AndAbove15Uid") !== null,
-                row => row.get("echoSexUid") === null
+            return filter(
+                aiDs,
+                (o)=>(
+                    [config?.financialYear??'FY22'] && o?.lessThan15AndAbove15Uid !== "NULL_OR_UNDEFINED" && o?.defaultUid === "NULL_OR_UNDEFINED" && o?.frequency === frequency && o?.echoSexUid ==="NULL_OR_UNDEFINED" && o?.echoAgeGroupUid === "NULL_OR_UNDEFINED"
+                ) 
             )
         }
         // Filter by <15 and 15+ and Gender
         else if(dimension?.key === 'lessThan15AndAbove15AndGender'){
-            return aiDs.chain(
-               // row => row.get([config?.financialYear??'FY22']) === true,
-                row => row.get("lessThan15AndAbove15Uid") !== null,
-                row => row.get("echoSexUid") !== null,
+            return filter(
+                aiDs,
+                (o)=>(
+                    [config?.financialYear??'FY22'] && o?.lessThan15AndAbove15Uid !== "NULL_OR_UNDEFINED" && o?.defaultUid === "NULL_OR_UNDEFINED" && o?.frequency === frequency && o?.echoSexUid !=="NULL_OR_UNDEFINED" && o?.echoAgeGroupUid === "NULL_OR_UNDEFINED"
+                ) 
             )
         }
         // default
-        else{
-            return aiDs.chain(
-               // row => row.get([config?.financialYear??'FY22']) === true,
-                row => row.get("defaultUid") !== null
+        else if (dimension?.key === 'default'){
+            return filter(
+                aiDs,
+                (o)=>(
+                    [config?.financialYear??'FY22'] && o?.lessThan15AndAbove15Uid === "NULL_OR_UNDEFINED" && o?.defaultUid !== "NULL_OR_UNDEFINED" && o?.frequency === frequency && o?.echoSexUid ==="NULL_OR_UNDEFINED" && o?.echoAgeGroupUid === "NULL_OR_UNDEFINED"
+                ) 
             )
+        }
+        else{
+            return null;
         }
 }
 
 
-export const useGetAiDataFrame = (ds,config,dimension)=>{
+export const getAiDataFrame = (ds,config,dimension,report)=>{
     // Start of ML 
     if(ds){
         const aiDs = aiGetDataFrame(ds);
-        const indMapData = getFilteredMapping(aiDs,dimension,config);
+        const toFilter= aiReplaceNull(aiDs,['echoSexUid','echoAgeGroupUid','defaultUid','lessThan15AndAbove15Uid'])
+        const indMapDataF = getFilteredMapping(toFilter?toFilter.toCollection():[],dimension,config,report);
+        const indMapData = aiGetDataFrame(indMapDataF);
         const aiSelectedIndicators = aiGetUniqueInColumn(indMapData,'echoIndicatorUid');
         const renamedIndMapData = renameDataColumns(indMapData,[
             {
@@ -78,11 +88,11 @@ export const useGetAiDataFrame = (ds,config,dimension)=>{
                 new: "EchoGenderCatOptionUid"
             },
             {
-                old:"ageGroup",
+                old:"echoAgeGroupUid",
                 new: "EchoAgeGroupCatOptionUid"
             },
             {
-                old:"lessThan15AndAbove15",
+                old:"lessThan15AndAbove15Uid",
                 new: "EchoAgeGroupLessThan15AndAbove15Uid"
             }
         ]);
@@ -102,23 +112,8 @@ export const useGetAiDataFrame = (ds,config,dimension)=>{
  * Component to Generate Data Import Table
  */
 export const AnalyticsList = React.memo(({ selected,ts,ds,config }) => {  
-    const [clicked, setClicked] = React.useState(false);
-    const { dimensions, report, clicked: isClicked } = selected;
-
-    //const ou = !isEmpty(selected)?getSelectedOrgUnit(selected[0].orgUnit):undefined;
-    const { df: data, ind:aiSelectedIndicators } = useGetAiDataFrame(ds,config,dimensions?.dimension);
-    /*
-    const fetchData = useCallback(async()=>{                       
-        if(report?.key === 'hfr'){
-            const items = getUniqArray(getIndicatorDimensions(report?.dataGroups,'id'));
-            setIndicators(items);
-        }
-        
-    },[ds,dimension?.key,report?.key,report?.dataGroups]);
-    */
-    React.useEffect(()=>{
-        setClicked(isClicked);
-    })
+    const { dimensions, report } = selected;
+    const { df: data, ind:aiSelectedIndicators } = getAiDataFrame(ds,config,dimensions?.dimension,report);
     return (
         <AnalyticsData 
             ts ={ JSON.stringify(ts) }
@@ -126,7 +121,6 @@ export const AnalyticsList = React.memo(({ selected,ts,ds,config }) => {
             indicators = { aiSelectedIndicators }
             mapping= { JSON.stringify(data?data.toCollection():null) }
             selected = { selected }
-            updated = { clicked}
         />                                                
     )
 });

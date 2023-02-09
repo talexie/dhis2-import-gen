@@ -20,7 +20,7 @@ const classes={
 const tsDataStore = ['dataStore/terminology/mappings'];
 export const ManageIndicatorMapping = () => {    
     const { data,isLoading,error } = useQuery(tsDataStore);
-    const keys = ['datimCode','datimUid','sex','ageGroup','datimXyz','hivStat','datimDisaggregationUid','datimDisaggregation','echoIndicatorUid','echoIndicatorName','echoSexUid','echoAgeGroupUid','lessThan15AndAbove15Uid','defaultUid'];
+    const keys = ['datimCode','datimUid','sex','ageGroup','datimXyz','hivStat','datimDisaggregationUid','datimDisaggregation','echoIndicatorUid','echoIndicatorName','echoSexUid','echoAgeGroupUid','lessThan15AndAbove15Uid','defaultUid','frequency','FY21','FY22'];
     const columns = createMoreColumns(['id'],keys);
     //const showDisplay = !loading && !error
     return (

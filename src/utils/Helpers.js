@@ -104,8 +104,8 @@ export const createColumns=(headers)=>{
     if(!isEmpty(headers)){
         return headers.map((hr)=>{
             hr.field = hr.name;
-            hr.title = startCase(hr.column);
-            hr.headerName = startCase(hr.column);
+            hr.title = hr.column;
+            hr.headerName = hr.column;
             return hr;
         })
     }
@@ -124,9 +124,9 @@ export const createMoreColumns=(columns,keys,idKey='id')=>{
                 columns.push({
                     ...k,
                     field :k?.field??k,
-                    title : k?.name??(k?.label??startCase(k)),
+                    title : k?.name??(k?.label??k),
                     order : k?.order??i,
-                    headerName : k?.name??(k?.label??startCase(k)),
+                    headerName : k?.name??(k?.label??k),
                     disableExport: k?.field ===idKey || k===idKey,
                     hide: k?.field ===idKey || k===idKey
                 });
@@ -134,8 +134,8 @@ export const createMoreColumns=(columns,keys,idKey='id')=>{
             else{
                 columns.push({
                     field : k?.field??k,
-                    title : k?.name??(k?.label??startCase(k)),
-                    headerName : k?.name??(k?.label??startCase(k)),
+                    title : k?.name??(k?.label??k),
+                    headerName : k?.name??(k?.label??k),
                     order : k?.order??i,
                     disableExport: k?.field ===idKey || k===idKey,
                     hide: k?.field ===idKey || k===idKey

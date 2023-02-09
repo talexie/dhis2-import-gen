@@ -23,13 +23,22 @@ const configDataStore = ['dataStore/terminology/config'];
  */
 export const AnalyticsListTable = (props) => {    
     const [selectedParam, setSelectedParam] = React.useState(undefined);
-    const { data: allLevels,isLoading } = useQuery([`organisationUnitLevels?paging=false&fields=level,name`],{ refetchOnWindowFocus: false });
+    const { data: allLevels,isLoading } = useQuery(
+        [`organisationUnitLevels?paging=false&fields=level,name`],
+        { refetchOnWindowFocus: false }
+    );
     const { data:ds,isLoading: loaded } = useQuery({
         queryKey: dataStore,
         refetchOnWindowFocus: false
     });
-    const {data:ts,isLoading: tsLoaded} = useQuery(tsDataStore,{  refetchOnWindowFocus: false });
-    const {data:config, isLoading: configLoaded} = useQuery(configDataStore, {  refetchOnWindowFocus: false });
+    const {data:ts,isLoading: tsLoaded} = useQuery(
+        tsDataStore,
+        {  refetchOnWindowFocus: false }
+    );
+    const {data:config, isLoading: configLoaded} = useQuery(
+        configDataStore, 
+        {  refetchOnWindowFocus: false }
+    );
     
     const getData=(ev)=>{
         setSelectedParam(ev);       

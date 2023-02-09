@@ -22,10 +22,17 @@ const classes = {
 
     }),
     label: css({
-        textAlign:'left'
+        textAlign:'left',
+        marginBottom: '4px'
     }),
     selected: css({
         backgroundColor: '#bdcebd'
+    }),
+    wrapper: css({
+        minWidth: '168px'
+    }),
+    grid: css({
+        paddingRight: '16px'
     })
 };
 
@@ -98,14 +105,13 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
         setSelectedReport(selected);
     }
     const update=()=>{
-        
         return getUpdate({ 
             period: period, 
             orgUnit: selected?.id,
             dimensions:dimension,
             report: report,
             orgUnitGroup: orgUnitGroup,
-            clicked:  true
+            submitted:  true
         });
     }
     const handleOpen =(_e)=>{
@@ -119,14 +125,14 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
                 <Grid>
                     <h3>DATIM Import File Generator</h3>
                 </Grid>            
-                <Grid container spacing={ 2 } alignItems="flex-start" >
-                    <Grid xs container spacing={ 2 } direction="column" alignItems="flex-start">
-                        <Grid xs>
+                <Grid container spacing={ 4 } alignItems="flex-start" >
+                    <Grid xs css = { classes.grid } container spacing={ 2 } direction="column" alignItems="flex-start">
+                        <Grid xs css = { classes.wrapper }>
                             <div>
                                 <Button css = { classes.label } onClick={ handleOpen }>
                                     <span>Select Organisation Unit</span>
                                 </Button>
-                                <span css={classes.selected}>Selected: { selected?.label || selected?.displayName }</span>
+                                <span css={classes.selected}> { selected?.label || selected?.displayName }</span>
                                 {
                                     open?(
                                         <div  css= { classes.orgUnit }>                                                    
@@ -143,7 +149,7 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
                                 }
                             </div>                                                  
                         </Grid>
-                        <Grid xs>
+                        <Grid xs css = { classes.wrapper }>
                             <PeriodField
                                 data ={ sortBy(ougs,'label') }
                                 placeholder= { `Select Organisation Unit Groups` }
@@ -154,8 +160,8 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
                             />
                         </Grid>
                     </Grid>
-                    <Grid xs container  spacing={ 2 } alignItems="flex-start" direction="column">
-                        <Grid xs>
+                    <Grid xs css = { classes.grid } container  spacing={ 2 } alignItems="flex-start" direction="column">
+                        <Grid xs css = { classes.wrapper }>
                             <PeriodField
                                 data ={ sortBy(periodTypes,'label') }
                                 placeholder= { `Select Period Type` }
@@ -165,8 +171,9 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
                                 
                             />
                         </Grid>
-                        <Grid xs>
+                        <Grid xs css = { classes.wrapper }>
                             <PeriodField
+                                
                                 data ={ sortBy(periods,"value") }
                                 placeholder= { `Select Period` }
                                 onChange = { onChangePeriod }
@@ -175,7 +182,7 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
                             />
                         </Grid>
                     </Grid>
-                    <Grid xs>
+                    <Grid xs css = { classes.wrapper }>
                         <PeriodField
                             data ={ sortBy(dimensions,'name') }
                             placeholder= { `Select Dimensions` }
@@ -183,7 +190,7 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
                             selected = { selectedDim}
                         />
                     </Grid>
-                    <Grid xs >
+                    <Grid xs css = { classes.wrapper }>
                         <PeriodField
                             data ={ sortBy(reports,'name') }
                             placeholder= { `Select Report` }

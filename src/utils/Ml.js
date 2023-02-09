@@ -49,7 +49,6 @@ export const aiMergedDataSets =(dfLeft,dfRight,on=['id'],how='left')=>{
             return dfLeft.join(dfRight, on, how);
         }
         return dfLeft;
-        
     }
     return null;
    
@@ -141,6 +140,22 @@ export const aiConcatColumn = (df,colName="AddColumnName",col1,col2,sep="")=>{
 export const aiAddColumn = (df,colName="AddColumnName",value="")=>{
     if(df  && df !== null){
         return df.withColumn(colName, () => value);
+    }
+    return null;
+}
+/**
+ * Replace value
+ * @param {*} df 
+ * @param {*} column 
+ * @param {*} value 
+ * @returns 
+ */
+export const aiReplaceNull = (df,column=[],value="NULL_OR_UNDEFINED")=>{
+    if(df  && df !== null){
+        if(isArraySubSet(df.listColumns(),column)){
+            return df.fillMissingValues(value,column);
+        }
+        return df;
     }
     return null;
 }

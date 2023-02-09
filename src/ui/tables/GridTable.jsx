@@ -32,7 +32,7 @@ export const GridTable = ( props )=> {
     search: search?search:true,
     grouping: grouping?grouping:false,
     selection: selection?selection:false,
-    pageSizeOptions: [10,25,50,100,250,500,1000,5000,10000,50000],
+    pageSizeOptions: [10,25,50,100,250,500,1000,5000,10000,50000,1000000],
     draggable: draggable?draggable: true,
 
   };
@@ -47,6 +47,8 @@ export const GridTable = ( props )=> {
             disableToolbarButton = { false }
             components={{ Toolbar: GridToolbar }}
             getRowId = { (row)=>row?.id??row?.[generateId]}
+            disableSelectionOnClick
+            disableMultipleSelection={true}
         />
     </Box>
   );
