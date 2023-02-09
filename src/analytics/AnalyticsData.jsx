@@ -12,7 +12,6 @@ import chunk from 'lodash/chunk';
 import queryString from 'query-string';
 import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import { Container } from '@mui/system';
-//import { useWorker } from 'react-hooks-worker';
 
 const createWorker = createWorkerFactory(() => import('../Worker'));
 /**

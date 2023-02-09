@@ -70,7 +70,13 @@ export const routes = [
           userGroup: "SMARTCARE_UPLOAD"
         }
       ]
-    }
+    },
+    {
+      label: "Data Export",
+      path: "/export",
+      index: true,
+      element: <DataExport />
+    },
   ]
 const router = createHashRouter(routes);
   

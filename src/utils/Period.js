@@ -30,69 +30,144 @@ export const periodTypes = [
         "value":"SixMonthlyOct"
     }
 ];
-
-export const generatePeriods=(type)=>{
+/**
+ * Generate Period Types
+ * @param {*} pe 
+ * @returns 
+ */
+export const getPeriodTypes =(pe=[])=>{
+    return periodTypes?.filter((p)=>{
+        return pe?.some((pt)=> pt?.toUpperCase() === p?.value?.toUpperCase());
+    });
+}
+/**
+ * Period Generator by Type
+ * @param {*} type 
+ * @returns 
+ */
+export const generatePeriods=(type,latest=false)=>{
     let periods = [];
     const today = new Date();
     if(type === 'Quarterly'){
-        periods = [0,1,2,3,4,5,6,7,8,9,12].map((q)=>{
-            return {
+        if(latest){
+            periods =[1].map((q)=>({
                 label:format(subQuarters(startOfQuarter(today),q),'QQQ yyyy'),
                 value:format(subQuarters(startOfQuarter(today),q),'yyyyQQQ')
-            };
-        });
-        
+            }));
+        }
+        else {
+            periods = [0,1,2,3,4,5,6,7,8,9,12].map((q)=>{
+                return {
+                    label:format(subQuarters(startOfQuarter(today),q),'QQQ yyyy'),
+                    value:format(subQuarters(startOfQuarter(today),q),'yyyyQQQ')
+                };
+            });
+        }
     }
     else if(type === 'Monthly'){
-        periods =  [0,1,2,3,4,5,6,7,8,9,10,11].map((q)=>{
-            return {
+        if(latest){
+            periods =[1].map((q)=>({
                 label:format(sub(today,{ years:0,months:q}),'MMMM yyyy'),
                 value:format(sub(today,{ years:0,months:q}),'RRRRMM')
-            }
-        })
+            }));
+        }
+        else {
+            periods =  [0,1,2,3,4,5,6,7,8,9,10,11].map((q)=>{
+                
+                return {
+                    label:format(sub(today,{ years:0,months:q}),'MMMM yyyy'),
+                    value:format(sub(today,{ years:0,months:q}),'RRRRMM')
+                }
+            })
+        }
     }
     else if(type === 'Yearly'){
-        periods =  [0,1,2,3,4,5].map((q)=>{
-            return {
+        if(latest){
+            periods =[1].map((q)=>({
                 label:format(sub(today,{ years:q }),'yyyy'),
                 value:format(sub(today,{ years:q }),'yyyy')
-            }
-        })
+            }));
+        }
+        else {
+            periods =  [0,1,2,3,4,5].map((q)=>{
+                return {
+                    label:format(sub(today,{ years:q }),'yyyy'),
+                    value:format(sub(today,{ years:q }),'yyyy')
+                }
+            })
+        }
     }
     else if(type === 'FinancialOct'){
-        periods =  [0,1,2,3,4,5].map((q)=>{
-            return {
+        if(latest){
+            periods =[1].map((q)=>({
                 label:`October, ${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')} - September, ${format(sub(today,{ years:q }),'yyyy')}`,
                 value:`${format(sub(startOfYear(today),{ months:3, years:q }),'yyyy')}Oct`
-            }
-        })
+            }));
+        }
+        else {
+            periods =  [0,1,2,3,4,5].map((q)=>{
+                return {
+                    label:`October, ${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')} - September, ${format(sub(today,{ years:q }),'yyyy')}`,
+                    value:`${format(sub(startOfYear(today),{ months:3, years:q }),'yyyy')}Oct`
+                }
+            })
+        }
     }
     else if(type === 'FinancialJuly'){
-        periods =  [0,1,2,3,4,5].map((q)=>{
-            return {
+        if(latest){
+            periods =[1].map((q)=>({
                 label:`July, ${format(sub(startOfYear(today),{ months:6,years:q }),'yyyy')} - June, ${format(sub(today,{ years:q }),'yyyy')}`,
                 value:`${format(sub(startOfYear(today),{ months:6,years:q }),'yyyy')}July`
-            }
-        })
+            }));
+        }
+        else {
+            periods =  [0,1,2,3,4,5].map((q)=>{
+                return {
+                    label:`July, ${format(sub(startOfYear(today),{ months:6,years:q }),'yyyy')} - June, ${format(sub(today,{ years:q }),'yyyy')}`,
+                    value:`${format(sub(startOfYear(today),{ months:6,years:q }),'yyyy')}July`
+                }
+            })
+        }
     }
     else if(type === 'SixMonthlyOct'){
-        //2020AprilS2: Oct-Mar,2020 , 2021AprilS1 : Apr -Sep 2021 
-        const sixMonthlyOctPeriods = [0,1,2,3,4,5].map((q)=>{
-            return [0,1].map((val)=>{
-                if(val === 0){
-                    return {
-                        label:`October, ${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')} - March, ${format(sub(today,{ years:q }),'yyyy')}`,
-                        value:`${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')}AprilS2`
+        let sixMonthlyOctPeriods =[];
+        if(latest){
+            sixMonthlyOctPeriods =[1].map((q)=>{
+                return [0,1].map((val)=>{
+                    if(val === 0){
+                        return {
+                            label:`October, ${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')} - March, ${format(sub(today,{ years:q }),'yyyy')}`,
+                            value:`${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')}AprilS2`
+                        }
                     }
-                }
-                else{
-                    return {
-                        label:`April, ${format(sub(today,{ years:q }),'yyyy')} - September, ${format(sub(today,{ years:q }),'yyyy')}`,
-                        value:`${format(sub(today,{ years:q }),'yyyy')}AprilS1`
+                    else{
+                        return {
+                            label:`April, ${format(sub(today,{ years:q }),'yyyy')} - September, ${format(sub(today,{ years:q }),'yyyy')}`,
+                            value:`${format(sub(today,{ years:q }),'yyyy')}AprilS1`
+                        }
                     }
-                }
+                });
             });
-        });
+        }
+        else {
+            //2020AprilS2: Oct-Mar,2020 , 2021AprilS1 : Apr -Sep 2021 
+            sixMonthlyOctPeriods = [0,1,2,3,4,5].map((q)=>{
+                return [0,1].map((val)=>{
+                    if(val === 0){
+                        return {
+                            label:`October, ${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')} - March, ${format(sub(today,{ years:q }),'yyyy')}`,
+                            value:`${format(sub(startOfYear(today),{ months:3,years:q }),'yyyy')}AprilS2`
+                        }
+                    }
+                    else{
+                        return {
+                            label:`April, ${format(sub(today,{ years:q }),'yyyy')} - September, ${format(sub(today,{ years:q }),'yyyy')}`,
+                            value:`${format(sub(today,{ years:q }),'yyyy')}AprilS1`
+                        }
+                    }
+                });
+            });
+        }
         periods = sixMonthlyOctPeriods?.reduce((acc,p)=>[...acc,...p]);
     }
     else{

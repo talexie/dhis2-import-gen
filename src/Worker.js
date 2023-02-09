@@ -1,4 +1,4 @@
-import { isEmpty, size, uniqBy, chunk } from 'lodash';
+import { isEmpty } from 'lodash';
 import { 
     aiGetDataFrame,
     aiGetColumns,
@@ -14,7 +14,6 @@ import {
     mergeColumnsAndData,
     nativeMerge,
 } from './utils';
-//import { exposeWorker } from 'react-hooks-worker';
 
 export const getDataTable = (props)=>{
     const {

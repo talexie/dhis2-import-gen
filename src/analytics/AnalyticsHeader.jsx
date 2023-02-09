@@ -81,7 +81,8 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
     }),[organisationUnitGroups?.organisationUnitGroups]);
     //const mechanisms = remapData(config?.mechanisms,'mechanism','name','id')
     const onChangePeriodType=({selected})=>{
-        setPeriodType(selected)
+        setPeriod(undefined);
+        setPeriodType(selected);        
         const generatedPeriods = generatePeriods(selected);
         setPeriods(generatedPeriods);
     }

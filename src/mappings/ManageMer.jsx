@@ -1,33 +1,43 @@
 import * as React from 'react';
 import { css } from '@emotion/react';
-import { FileInputField, Button } from '@dhis2/ui';
+import { FileInputField, Button, Divider, NoticeBox, FileListItem } from '@dhis2/ui';
 import { Container, Stack } from '@mui/material';
 import { useState } from 'react';
 import { useOrgUnit,PeriodField, OrgUnitControl } from '../ui';
 import sortBy from 'lodash/sortBy';
-import { generatePeriods, periodTypes } from '../utils';
+import { generatePeriods, getPeriodTypes } from '../utils';
+import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 
+const createWorker = createWorkerFactory(() => import('../ExcelConverterWorker'));
 
 const classes={
     root: css({
-        marginTop: 0,
         marginLeft: 20
-    })
+    }),
+    orgUnit: css({      
+        position: 'relative',
+        width: '300px'
+    }),
+    label: css({
+        textAlign:'left',
+        marginBottom: '4px'
+    }),
 };
+const periodTypes = getPeriodTypes(['Monthly','Quarterly']);
 export const ManageMer = () => {   
-    
-    const [open, setOpen ] = useState(false);
-    
+    const [open, setOpen ] = useState(false); 
+    const workerFile = useWorker(createWorker);
     const [periodType, setPeriodType ] = React.useState(undefined);
     const [period, setPeriod ] = React.useState(undefined);
     const [periods, setPeriods ] = React.useState([]);
+    const [file, setFile ] = React.useState(undefined);
+    const [fileName, setFileName ] = React.useState(undefined);
     const [selected, setSelected ] = React.useState([]);
     const { organisationUnitId, handleOrganisationUnitChange} = useOrgUnit();
-
-
     const onChangePeriodType=({selected})=>{
-        setPeriodType(selected)
-        const generatedPeriods = generatePeriods(selected);
+        setPeriod(undefined);
+        setPeriodType(selected);        
+        const generatedPeriods = generatePeriods(selected,true);
         setPeriods(generatedPeriods);
     }
     const onChangePeriod=({ selected })=>{
@@ -36,13 +46,17 @@ export const ManageMer = () => {
     const getOrgUnit =(value)=>{
         setSelected(value);
     }
-    const upload=()=>{
+    const upload=async()=>{
         /*return getUpdate({ 
             period: period, 
             orgUnit: selected?.id,
             submitted:  true
         });*/
         // Process data
+        return workerFile.createDhis2Import(file).then((fileResult)=>{
+            console.log("Result:::",fileResult);
+        })
+
     }
     const handleOpen =(_e)=>{
         setOpen(true);
@@ -51,16 +65,29 @@ export const ManageMer = () => {
         setOpen(false);
     }
     const onChange =(fileObject,_e)=>{
-        const { name, files } = fileObject;
-        console.log("files:",files);
+        const {  files } = fileObject;
+        
+        setFileName(files[0]?.name);
+        //setFile(files[0]);
+        const fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(files[0]);
+        fileReader.onload = e => {
+            setFile(e?.target?.result);
+        };
+    }
+    const onRemove =()=>{
+        setFile(undefined);
+        setFileName(undefined);
     }
     return (
         <Container css={ classes.root }>
-            <Stack spacing= {2}>
-            <Item>
+            <Stack spacing= {2} alignItems={ 'flex-start'}>
                 <h3>SMARTCare Upload</h3>
-            </Item> 
-            <Item>
+                <Divider/>  
+                <NoticeBox title={"How to submit the SMARTCARE Report"}>
+                    Select the facility,reporting period and upload the SMARTCARE report.
+                </NoticeBox>
+                <Divider/>  
                 <div>
                     <Button css = { classes.label } onClick={ handleOpen }>
                         <span>Select Organisation Unit</span>
@@ -68,7 +95,7 @@ export const ManageMer = () => {
                     <span css={classes.selected}> { selected?.label || selected?.displayName }</span>
                     {
                         open?(
-                            <div  css= { classes.orgUnit }>                                                    
+                            <div>                                                    
                                 <OrgUnitControl                      
                                     getSelected = { getOrgUnit }
                                     multiSelect = { false }
@@ -81,8 +108,7 @@ export const ManageMer = () => {
                         ): null
                     }
                 </div>     
-            </Item>
-            <Item>
+                <Divider/>  
                 <PeriodField
                     data ={ sortBy(periodTypes,'label') }
                     placeholder= { `Select Period Type` }
@@ -91,26 +117,33 @@ export const ManageMer = () => {
                     input = { periodType }
                     
                 />
-            </Item>
-            <Item>
+                <Divider/>  
                 <PeriodField      
                     data ={ sortBy(periods,"value") }
                     placeholder= { `Select Period` }
                     onChange = { onChangePeriod }
                     selected = { period }
                     multi = { true }
-                />
-            </Item>            
-            <Item>         
+                />          
+                <Divider/>         
                 <FileInputField
                     helpText="Please submit EXCEL report file from SMARTCARE"
                     label="Upload SMARTCARE Report"
                     name="uploadName"
                     required= { true}
                     onChange={onChange}
-                />         
-            </Item>
-            <Item>
+                >
+                    {
+                        fileName?(
+                            <FileListItem
+                                label={ fileName??'' }
+                                onRemove={onRemove}
+                                removeText="Remove"
+                            />
+                        ):null
+                    }
+                </FileInputField>         
+                <Divider/>
                 <Button
                     name="Button"
                     onClick={ upload }
@@ -119,10 +152,9 @@ export const ManageMer = () => {
                 >
                     Submit
                 </Button>
-            </Item>
             </Stack>
         </Container>
     )
 }
 
-export default ManageIndicatorMapping;
+export default ManageMer;
