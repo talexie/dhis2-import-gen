@@ -81,7 +81,7 @@ export const getAiDataFrame = (ds,config,dimension,report)=>{
         const renamedIndMapData = renameDataColumns(indMapData,[
             {
                 old:"echoIndicatorUid",
-                new:"EchoIndicatorID",
+                new:"EchoIndicatorUid",
             },
             {
                 old: "echoSexUid",
@@ -94,6 +94,15 @@ export const getAiDataFrame = (ds,config,dimension,report)=>{
             {
                 old:"lessThan15AndAbove15Uid",
                 new: "EchoAgeGroupLessThan15AndAbove15Uid"
+            },
+            {
+                old: "datimUid",
+                new: "DatimDataElementUid"
+            },
+            {
+                old:"datimDisaggregationUid",
+                new: "DatimDisaggregationUid"
+
             }
         ]);
         return {

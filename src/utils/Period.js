@@ -1,4 +1,4 @@
-import { sub,format,subQuarters,startOfQuarter,startOfYear } from 'date-fns';
+import { sub,format,subQuarters,startOfQuarter,startOfYear, endOfQuarter } from 'date-fns';
 import orderBy from 'lodash/orderBy';
 export const periodTypes = [
     {
@@ -50,16 +50,22 @@ export const generatePeriods=(type,latest=false)=>{
     const today = new Date();
     if(type === 'Quarterly'){
         if(latest){
-            periods =[1].map((q)=>({
-                label:format(subQuarters(startOfQuarter(today),q),'QQQ yyyy'),
-                value:format(subQuarters(startOfQuarter(today),q),'yyyyQQQ')
-            }));
+            periods =[1].map((q)=>{
+                const squarter = subQuarters(startOfQuarter(today),q);
+                const endsQuarter = subQuarters(endOfQuarter(today),q);
+                return {
+                    label:`${format(squarter,'MMM yyyy')}-${format(endsQuarter,'MMM yyyy')}`,
+                    value:format(squarter,'yyyyQQQ')
+                };
+            });
         }
         else {
             periods = [0,1,2,3,4,5,6,7,8,9,12].map((q)=>{
+                const quarter = subQuarters(startOfQuarter(today),q);
+                const endQuarter = subQuarters(endOfQuarter(today),q);
                 return {
-                    label:format(subQuarters(startOfQuarter(today),q),'QQQ yyyy'),
-                    value:format(subQuarters(startOfQuarter(today),q),'yyyyQQQ')
+                    label:`${format(quarter,'MMM yyyy')}-${format(endQuarter,'MMM yyyy')}`,
+                    value:format(quarter,'yyyyQQQ')
                 };
             });
         }

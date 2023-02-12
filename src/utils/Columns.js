@@ -51,7 +51,7 @@ export const dropMultiColumns =(df,columns=[])=>{
  */
 export const getOuNameHierarchy =(ouNames)=>{
     return Object.entries(ouNames??{})?.map(([key,value])=>{
-        const splitName = value?.split("/");
+        const splitName = value?.split("/")?.filter(Boolean)?.filter(String);
         const splitNameObj = {
             'ou': key
         };
@@ -64,9 +64,26 @@ export const getOuNameHierarchy =(ouNames)=>{
  * @param {*} levels 
  */
 export const getOuLevelColumns =(levels)=>{
-    return levels?.map((level)=>({ 
-        [`level${level?.level}`]: level?.name??level?.displayName
-    }));
+    return levels?.map((level)=>{
+        if(level?.level ===4){
+            return ({ 
+                old:`level${level?.level}`,
+                new: "Province"
+            });
+        }
+        else if(level?.level ===5){
+            return ({ 
+                old:`level${level?.level}`,
+                new: "District"
+            });
+        }
+        else{
+            return ({ 
+                old:`level${level?.level}`,
+                new: level?.name??level?.displayName
+            });
+        }
+    });    
 }
 /**
  * Merge DHIS2 analytics data from parallel fetches

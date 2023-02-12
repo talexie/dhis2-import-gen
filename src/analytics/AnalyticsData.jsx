@@ -41,11 +41,10 @@ export const fetcher = (...urls) => {
  * Component to Generate Data Import Table
  */
 export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config }) => { 
-    const { submitted } = selected;
     const worker = useWorker(createWorker);
     const [message, setMessage] = React.useState(null);   
     const [clicked, setClicked] = useState(false);
-    const { period:pe, dimensions, orgUnit:ou, report, orgUnitGroup, levels } = selected || {}; 
+    const { period:pe, dimensions, orgUnit:ou, report, orgUnitGroup, levels,submitted } = selected || {}; 
     const hierarchy = JSON.stringify(levels); 
     const dimension = dimensions?.dimension;
     const dim= getCategoryDimensions(dimension?.items);  
@@ -110,7 +109,7 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
                   ts: ts,
                   data: data,
                   mapping: mapping,
-                  hierarchy: hierarchy,
+                  levels: hierarchy,
                   mechanism: mechanism,
                   key: dimension?.key
               }
