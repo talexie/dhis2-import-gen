@@ -15,6 +15,7 @@
   Upload the zip file to DHIS2
 
 ## How to Configure SMARTCARE Data Submission
+
    1. Create organisation Group with the code *`SMARTCARE_LEGACY`*. 
    Add all organisation Units which use legacy smartcare to this group.
 
