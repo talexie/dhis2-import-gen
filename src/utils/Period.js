@@ -60,7 +60,7 @@ export const generatePeriods=(type,latest=false)=>{
             });
         }
         else {
-            periods = [0,1,2,3,4,5,6,7,8,9,12].map((q)=>{
+            periods = [1,2,3,4,5,6,7,8,9,12].map((q)=>{
                 const quarter = subQuarters(startOfQuarter(today),q);
                 const endQuarter = subQuarters(endOfQuarter(today),q);
                 return {
@@ -78,7 +78,7 @@ export const generatePeriods=(type,latest=false)=>{
             }));
         }
         else {
-            periods =  [0,1,2,3,4,5,6,7,8,9,10,11].map((q)=>{
+            periods =  [1,2,3,4,5,6,7,8,9,10,11].map((q)=>{
                 
                 return {
                     label:format(sub(today,{ years:0,months:q}),'MMMM yyyy'),

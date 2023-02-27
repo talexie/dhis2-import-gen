@@ -5,7 +5,7 @@ import { Container } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { getUserGroup, useCurrentUser, UserContext } from './utils';
-import { CircularLoader } from '@dhis2/ui';
+import { CircularLoader, Divider } from '@dhis2/ui';
 
 const root =css({
   minWidth: '600px'
@@ -46,8 +46,9 @@ export const AppRoutes = () => {
       }}>
         <div css ={ root }>
           <NavTabs
-          options= { links }
+            options= { links }
           />
+          <Divider/>
           <Container>
               <Outlet />
           </Container>

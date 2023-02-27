@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css } from '@emotion/react';
-import { FileInputField, Button, Divider, NoticeBox, FileListItem, Modal, ModalContent,ModalTitle, ButtonStrip, ModalActions } from '@dhis2/ui';
+import { FileInputField, Button, Divider, NoticeBox, FileListItem, Modal, ModalContent,ModalTitle, ButtonStrip, ModalActions, CircularLoader } from '@dhis2/ui';
 import { Container, Stack } from '@mui/material';
 import { useState, useRef } from 'react';
 import { useOrgUnit,PeriodField, OrgUnitControl, ImportFeedBack } from '../ui';
@@ -39,6 +39,10 @@ const classes={
     validateCss: css({
         marginBottom: '16px',
         marginTop: '16px'
+    }),
+    notice: css({
+        color: 'red',
+        padding:  '16px'
     })
 };
 const periodTypes = getPeriodTypes(['Monthly','Quarterly']);
@@ -76,11 +80,12 @@ export const ManageMer = () => {
     const [isCompleted, setIsCompleted]= useState(false);
     const [isLegacy, setIsLegacy]= useState(false);
     const [confirmed, setConfirmed] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
     const [fileName, setFileName ] = React.useState(undefined);
     const [selected, setSelected ] = React.useState([]);
     const [mapping, setMapping ] = React.useState([]);
     const [message,setMessage] = useState("");
-    const { user,canResubmit } = useUser();
+    const { canResubmit } = useUser();
     const [selectedPeriod,setSelectedPeriod] = useState("");
     const { organisationUnitId, handleOrganisationUnitChange} = useOrgUnit();
     const { data: smartcare, isLoading } = useQuery({
@@ -95,14 +100,17 @@ export const ManageMer = () => {
             setMessage(data?.response);
             if(data?.status ==="OK" && data.response.status ==="SUCCESS"){
                 setIsCompleted(true);
+                setSubmitted(false);
             }
             else{
                 setIsCompleted(false);
+                setSubmitted(false);
             }       
         },
         onError: () => {
           alert("There was an error");
           setIsCompleted(false);
+          setSubmitted(false);
         },
         onSettled: () => {
           queryClient.invalidateQueries('create');
@@ -136,11 +144,12 @@ export const ManageMer = () => {
     }
     const submitData = async ()=>{
         setIsValidating(false);
+        setSubmitted(true);
         const sData = await workerFile.createDhis2Payload(rows, mapping, period, selected?.id, 'KRoNPjJgBy1',isLegacy);
         const dataValues = {
             dataValues: sData
         };
-        mutate(dataValues);
+        mutate(dataValues);     
     }
     const handleOpen =(_e)=>{
         setOpen(true);
@@ -151,6 +160,7 @@ export const ManageMer = () => {
     const onClose =(_e)=>{
         setConfirmed(true);
         setRevalidated(false);
+        submitData();
     }
     const onCancel =(_e)=>{
         setConfirmed(false);
@@ -205,7 +215,9 @@ export const ManageMer = () => {
                                     type={ message?.status }
                                     message = { message }
                                 />
-                            ):null
+                            ):(
+                                submitted?(<CircularLoader />):null
+                            )
                         }
                         <Divider/>  
                         <div>
@@ -268,12 +280,11 @@ export const ManageMer = () => {
                             confirmed?(
                                 <Button
                                     name="Button"
-                                    onClick={ submitData }
                                     type="button"
                                     value="default"
-                                    disabled ={ isCompleted }
+                                    disabled ={ isCompleted || true}
                                 >
-                                    Submit
+                                   { isCompleted?"Submitted" : "Submitting" }
                                 </Button>
                             ):(
                                 <Button
@@ -290,21 +301,22 @@ export const ManageMer = () => {
                             revalidate?(
                                 <Modal onClose={onCancel} small>
                                     <ModalTitle>
-                                        Please confirm the submission below
+                                        Are you submitting SMARTCARE data for:
                                     </ModalTitle>
                                     <ModalContent>
                                         <Stack>
                                             <div>Facility: { selected?.name || selected?.displayName }</div>
                                             <div>Period: {  selectedPeriod?.label??""} </div>
+                                            <div css={ classes.notice }>Please click <b>"Yes"</b> to accept and  submit data, or <b>"No"</b> to cancel and restart the submission.</div>
                                         </Stack>
                                     </ModalContent>
                                     <ModalActions>
                                         <ButtonStrip end>
                                             <Button onClick={ onClose } primary>
-                                                Confirm
+                                                Yes
                                             </Button>
                                             <Button onClick={ onCancel } primary>
-                                                Cancel
+                                                No
                                             </Button>
                                         </ButtonStrip>
                                     </ModalActions>
