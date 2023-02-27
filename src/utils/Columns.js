@@ -1,5 +1,5 @@
 import { aiRenameLabels } from "./Ml";
-import { merge, get, set, omit, size,map,find } from 'lodash';
+import { merge, get, set, omit, size,map,find, difference } from 'lodash';
 
 /**
  * Extract columns from headers.
@@ -125,7 +125,7 @@ export const mergeColumnsAndData =(data=[],columns=[])=>{
         const newObj = {};
         columns?.forEach((column)=>{
             if(column?.new === 'value'){
-                newObj[column?.new] = parseFloat(value[column?.old]).toFixed(0); 
+                newObj[column?.new] = parseFloat(value[column?.old])?.toFixed(0); 
             }
             else{
                 newObj[column?.new]=value[column?.old]
@@ -146,7 +146,9 @@ export const nativeMerge =(left=[],right=[],keys=[])=>{
     return map(left,(l)=>{ 
         const innerRow = find(right,(r)=>{
             const check = keys?.reduce((acc,k)=>{
-                const accTest = acc && (get(r,k) === get(l,k));
+                const leftValue = get(l,k);
+                const rightValue = get(r,k);
+                const accTest = acc && ( leftValue?.trim() === rightValue?.trim());
                 return accTest;
             },true);
              return check;
@@ -177,10 +179,37 @@ export const nativeRenameLabels = (data,columns=[])=>{
  */
 export const nativeDropLabels = (data,columns=[])=>{
     return map(data,(d)=>{
-        columns?.forEach((c)=>{
+        /*columns?.forEach((c)=>{
             delete d?.[c?.old];
         });
+        return d;*/
+        return omit(d,columns);
+        
+    })
+}
+
+/**
+ * Add a column to data frame
+ * @param {*} data 
+ * @param {*} colName 
+ * @param {*} value 
+ * @returns 
+ */
+export const nativeAddLabels = (data,colName="AddColumnName",value="")=>{
+    return map(data,(d)=>{
+        set(d,colName,value);
         return d;
+    })
+}
+
+export const nativeSelectByDropColumns =(data,columns=[])=>{
+    return map(data,(d,i)=>{
+        const keys = Object.keys(d);
+        if(!Object.hasOwn(d,'id')){
+            d['id'] = i
+        }
+        const variantCols = difference(keys,columns);
+        return omit(d,variantCols)
     })
 }
 /**

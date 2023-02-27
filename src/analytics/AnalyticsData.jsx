@@ -12,6 +12,7 @@ import chunk from 'lodash/chunk';
 import queryString from 'query-string';
 import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import { Container } from '@mui/system';
+import { NoticeBox } from '@dhis2/ui';
 
 const createWorker = createWorkerFactory(() => import('../Worker'));
 /**
@@ -44,21 +45,21 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
     const worker = useWorker(createWorker);
     const [message, setMessage] = React.useState(null);   
     const [clicked, setClicked] = useState(false);
+    const [error,setError] = useState(false);
     const { period:pe, dimensions, orgUnit:ou, report, orgUnitGroup, levels,submitted } = selected || {}; 
     const hierarchy = JSON.stringify(levels); 
     const dimension = dimensions?.dimension;
     const dim= getCategoryDimensions(dimension?.items);  
     const filterMechanism = getFilterMechanism(report);
     const mechanism = report?.mechanism; 
-    const catOptionFilter = isEmpty(dim)?[]:dim;
     const qsQuery =(q)=>{
-        if(ou){
+        if(ou && !orgUnitGroup){
             return queryString.stringify({
                 dimension:[
                     `pe:${pe?.join(';')}`,
                     `ou:LEVEL-6-${ou}`,
                     `dx:${ q?.join(';')}`
-                ].concat(catOptionFilter),
+                ].concat(dim),
                 filter: filterMechanism,
                 displayProperty:`NAME`,
                 hierarchyMeta:true,
@@ -70,13 +71,17 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
                 skipNulls: true 
             }); 
         }
+        else if(ou && orgUnitGroup){
+            setError(true);
+            return undefined;
+        }
         else {
             return queryString.stringify({
                 dimension:[
                     `pe:${pe?.join(';')}`,
                     `ou:OU_GROUP-${orgUnitGroup}`,
                     `dx:${ q?.join(';')}`
-                ].concat(catOptionFilter),
+                ].concat(dim),
                 filter: filterMechanism,
                 displayProperty:`NAME`,
                 hierarchyMeta:true,
@@ -90,7 +95,7 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
         }
     }
 
-    const chunkQuery =(q)=>((!isEmpty(pe) && !isEmpty(q) && ou) || (!isEmpty(pe) && !isEmpty(q) && orgUnitGroup))?`analytics.json?${qsQuery(q)}`:false;   
+    const chunkQuery =(q)=>(((!isEmpty(pe) && !isEmpty(q) && ou) || (!isEmpty(pe) && !isEmpty(q) && orgUnitGroup)) && qsQuery(q))?`analytics.json?${qsQuery(q)}`:false;   
     const chunkedIndicators = chunk(indicators??[],config?.chunks??15)??[];
     const urls = chunkedIndicators.map((chunkedInd)=>chunkQuery(chunkedInd)).filter(Boolean).filter(String);
     const userQueries = useQueries(urls?.map((chunked) => {
@@ -141,6 +146,13 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
     // End of ML analysis
     return (
         <Container>
+            {
+                error?(
+                    <NoticeBox error>
+                        Both Organisation Unit and Organisation Unit Group can not selected. Please select one.
+                    </NoticeBox>
+                ):null
+            }
             <GridTable 
                 title = { `${report?.label??'DATIM Import'} Report` } 
                 columns= { message?.columns??[] } 

@@ -28,21 +28,24 @@ export const ManageOrgUnitMapping = () => {
                 <h3>DATIM/Echo Location Mappings</h3>
             </Grid>            
             <Grid item>
-                { error && <span>{ `ERROR: ${error.message}` }</span>}
-            
-                {
-                    isLoading?(
-                        <CircularLoader large/>
+                { 
+                    error?(
+                        <span>{ `ERROR: ${error.message}` }</span>
                     ):
                     (
-                        <GridTable 
-                            title = { 'Mapping' } 
-                            columns= { columns??[] } 
-                            data = { data??[] } 
-                            loading = { isLoading }
-                        />
+                        isLoading?(
+                            <CircularLoader large/>
+                        ):
+                        (
+                            <GridTable 
+                                title = { 'Mapping' } 
+                                columns= { columns??[] } 
+                                data = { data??[] } 
+                                loading = { isLoading }
+                            />
+                        )
                     )
-                }               
+                }
             </Grid>
         </Grid>
     )

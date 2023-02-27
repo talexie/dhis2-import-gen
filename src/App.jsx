@@ -38,45 +38,39 @@ const queryClient = new QueryClient({
 });
 export const routes = [
     {
-      path: "/",
       element: <AppRoutes/> ,
       errorElement: <PageError/>,
       children: [
         {
+          path: "/",
+          element: <DataExport />,
+          userGroup: "MANAGE_DATIM_ADMIN" 
+        },
+        {
           label: "Data Export",
-          path: "/export",
-          index: true,
-          element: <DataExport />
+          path: "export",
+          element: <DataExport />,
+          userGroup: "MANAGE_DATIM_ADMIN" 
         },
         {
           label: "Indicator Mapping",
-          path: "/imapping",
-          element: <ManageIndicatorMapping/>
+          path: "imapping",
+          element: <ManageIndicatorMapping/>,
+          userGroup: "MANAGE_DATIM_ADMIN" 
         },
         {
           label: "Location Mapping",
-          path: "/lmapping",
-          element: <ManageOrgUnitMapping /> 
-        },
-        {
-          label: "Setup",
-          path: "/setup",
-          element: <Setup/>
+          path: "lmapping",
+          element: <ManageOrgUnitMapping />,
+          userGroup: "MANAGE_DATIM_ADMIN" 
         },
         {
           label: "SMARTCARE",
-          path: "/upload",
-          element: <ManageMer/>,
-          userGroup: "SMARTCARE_UPLOAD"
+          path: "upload",
+          element: <ManageMer/>
         }
       ]
-    },
-    {
-      label: "Data Export",
-      path: "/export",
-      index: true,
-      element: <DataExport />
-    },
+    }
   ]
 const router = createHashRouter(routes);
   

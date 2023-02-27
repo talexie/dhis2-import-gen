@@ -103,6 +103,18 @@ export const getAiDataFrame = (ds,config,dimension,report)=>{
                 old:"datimDisaggregationUid",
                 new: "DatimDisaggregationUid"
 
+            },
+            {
+                old: "datimCode",
+                new: "DatimDataElementCode"
+            },
+            {
+                old: "echoIndicatorName",
+                new: "EchoIndicatorName"
+            },
+            {
+                old: "datimDisaggregation",
+                new: "DatimDisaggregationName"
             }
         ]);
         return {

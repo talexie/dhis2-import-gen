@@ -6,9 +6,7 @@ import { useEffect, useState } from 'react'
 import { LocationNode} from './nodes';
 import { 
     filterRootIds,
-    orgUnitPathPropType,
     defaultRenderNodeLabel,
-    requiredIf,
     getRootNodes
 } from './util';
 import { RootError } from './RootError';

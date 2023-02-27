@@ -86,10 +86,11 @@ export const getCategoryDimensions =(category)=>{
             if(cat.type ==='CATEGORY_GROUP_SET'){
                 key='categoryOptionGroups';
             }
-            const dimension = cat?.[key]?.map((option)=>{
+            /*const dimension = cat?.[key]?.map((option)=>{
                 return option?.id;
             }).filter(Boolean).filter(String);
-            return `${cat?.id}:${dimension?.join(';')}`;
+            return `${cat?.id}:${dimension?.join(';')}`;*/
+            return cat?.id;
         }).filter(Boolean).filter(String)
     }
     else{

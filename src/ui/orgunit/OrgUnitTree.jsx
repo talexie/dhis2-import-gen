@@ -32,7 +32,7 @@ const query = {
     data: {
         resource: 'me',
         params: {
-            fields: 'organisationUnits[id,path,displaName], authorities',
+            fields: 'organisationUnits[id,path,displayName], authorities',
         },
     },
 }
@@ -47,10 +47,7 @@ export const useUserOrganisationUnits = () => {
         refetch,
     } = useQuery([`${allRootQuery.allRoots.resource}?${queryString.stringify(allRootQuery.allRoots.params)}`], { lazy: true })
     useEffect(() => {
-        if (
-            !data?.organisationUnits.length &&
-            data?.authorities.includes('ALL')
-        ) 
+        if (!data?.organisationUnits.length && data?.authorities.includes('ALL')) 
         {
             //fetch all orgs
             refetch()
@@ -58,10 +55,9 @@ export const useUserOrganisationUnits = () => {
     }, [data])
 
     return {
-        loading: loadingAll || isLoading,
-        organisationUnits:
-            dataAll?.organisationUnits || data?.organisationUnits,
-        error: errorAll || error,
+        loading: data?.authorities.includes('ALL')?loadingAll:isLoading,
+        organisationUnits: data?.authorities.includes('ALL')?dataAll?.organisationUnits: data?.organisationUnits,
+        error: data?.authorities.includes('ALL')? errorAll : error,
     }
 }
 

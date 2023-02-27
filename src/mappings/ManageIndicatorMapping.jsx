@@ -22,30 +22,32 @@ export const ManageIndicatorMapping = () => {
     const { data,isLoading,error } = useQuery(tsDataStore);
     const keys = ['datimCode','datimUid','sex','ageGroup','datimXyz','hivStat','datimDisaggregationUid','datimDisaggregation','echoIndicatorUid','echoIndicatorName','echoSexUid','echoAgeGroupUid','lessThan15AndAbove15Uid','defaultUid','frequency','FY21','FY22'];
     const columns = createMoreColumns(['id'],keys);
-    //const showDisplay = !loading && !error
     return (
         <Grid container css={ classes.root } direction= { 'column' } >
             <Grid item>
                 <h3>DATIM/Echo Indicator Mappings</h3>
             </Grid>            
             <Grid item>
-                { error && <span>{ `ERROR: ${error.message}` }</span>}
-            
-                {
-                    isLoading?(
-                        <CircularLoader large/>
-                    ):
+                { 
+                    error?
                     (
-                        <GridTable 
-                            title = { 'Mapping' } 
-                            columns= { columns??[] } 
-                            data = { data??[] } 
-                            loading = { isLoading }
-                            generateId = { 'datimUid' }
-                        />
+                        <span>{ `ERROR: ${error.message}` }</span>
+                    ): 
+                    (
+                        isLoading?(
+                            <CircularLoader large/>
+                        ):
+                        (
+                            <GridTable 
+                                title = { 'Mapping' } 
+                                columns= { columns??[] } 
+                                data = { data??[] } 
+                                loading = { isLoading }
+                                generateId = { 'datimUid' }
+                            />
+                        )   
                     )
-                }             
-            
+                }                     
             </Grid>
         </Grid>
     )
