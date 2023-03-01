@@ -1,6 +1,6 @@
 import { read, utils } from 'xlsx';
 import { get } from 'lodash';
-import { nativeMerge, nativeRenameLabels } from './utils';
+import { nativeMerge, nativeRenameLabels, toValue } from './utils';
 
 export const createDhis2Import =(file)=>{
     const wb = read(file);
@@ -170,7 +170,7 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
             orgUnit : orgUnit,
             period :period,
             attributeOptionCombo: aoc,
-            value: d?.['value'],
+            value: toValue(d?.['value']),
             dataElement: d?.['dataElement'],
             categoryOptionCombo: d?.['categoryOptionCombo']
         }

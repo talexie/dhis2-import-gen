@@ -172,6 +172,22 @@ export const nativeRenameLabels = (data,columns=[])=>{
     })
 }
 /**
+ * Convert to value
+ * @param {*} v 
+ * @returns 
+ */
+export const toValue =(v)=>{
+    let value = v;
+    if((typeof value === 'string') && value) {
+        value = value?.trim();
+        if(value){
+            value = parseInt(value);
+        }
+    }
+    return value;
+}
+
+/**
  * Drop columns names
  * @param {*} data 
  * @param {*} columns 
