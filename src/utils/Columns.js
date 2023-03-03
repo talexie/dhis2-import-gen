@@ -178,13 +178,31 @@ export const nativeRenameLabels = (data,columns=[])=>{
  */
 export const toValue =(v)=>{
     let value = v;
+    const regex = /[a-zA-Z\s?#%]*/ig;
+    //const match = [...value?.matchAll(regex)];
     if((typeof value === 'string') && value) {
         value = value?.trim();
+        value = value?.replaceAll('%','')?.replaceAll('#','')?.replaceAll("'","")?.replaceAll('"','');
+        value = value.replaceAll(regex,'');
         if(value){
             value = parseInt(value);
         }
+        return value;
     }
-    return value;
+    else if((typeof value !== 'string') && value) {
+        value = value?.toString();
+        value = value?.trim();
+        value = value?.replaceAll('%','')?.replaceAll('#','')?.replaceAll("'","")?.replaceAll('"','');
+        
+        value = value.replaceAll(regex,'');
+        if(value){
+            value = parseInt(value);
+        }
+        return value;
+    }
+    else{
+        return value;
+    }    
 }
 
 /**
