@@ -164,7 +164,7 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
             new: "categoryOptionCombo"
         }
     ]);
-    const filteredData = renameMergedData?.filter((f)=>Object.hasOwn(f,'dataElement') && Object.hasOwn(f,'categoryOptionCombo') && get(f,'dataElement') && get(f,'categoryOptionCombo') && (toValue(get(f,'value')) > 0));
+    const filteredData = renameMergedData?.filter((f)=>Object.hasOwn(f,'dataElement') && Object.hasOwn(f,'categoryOptionCombo') && get(f,'dataElement') && get(f,'categoryOptionCombo') && (toValue(get(f,'value')) > -1));
     return filteredData?.map((d)=>{
         return {
             orgUnit : orgUnit,

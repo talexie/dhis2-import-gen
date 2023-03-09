@@ -45,7 +45,7 @@ const classes={
         padding:  '16px'
     })
 };
-const periodTypes = getPeriodTypes(['Monthly','Quarterly']);
+const periodTypes = getPeriodTypes(['Monthly']);
 
 export const postData = async(bodyData)=>{
     const fetchBody = JSON.stringify(bodyData);
