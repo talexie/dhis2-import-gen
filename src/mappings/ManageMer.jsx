@@ -43,6 +43,10 @@ const classes={
     notice: css({
         color: 'red',
         padding:  '16px'
+    }),
+    success: css({
+        color: 'green',
+        padding:  '16px'
     })
 };
 const periodTypes = getPeriodTypes(['Monthly']);
@@ -305,17 +309,18 @@ export const ManageMer = () => {
                                     </ModalTitle>
                                     <ModalContent>
                                         <Stack>
-                                            <div>Facility: { selected?.name || selected?.displayName }</div>
-                                            <div>Period: {  selectedPeriod?.label??""} </div>
-                                            <div css={ classes.notice }>Please click <b>"Yes"</b> to accept and  submit data, or <b>"No"</b> to cancel and restart the submission.</div>
+                                            <div css={ classes.label }>Facility: { selected?.name || selected?.displayName }</div>
+                                            <div css={ classes.label }>Period: {  selectedPeriod?.label??""} </div>
+                                            <div css={ classes.success }>Please click <b>"Yes"</b> to accept and  submit data</div>
+                                            <div css={ classes.notice }><b>"No"</b> to cancel and restart the submission.</div>
                                         </Stack>
                                     </ModalContent>
                                     <ModalActions>
-                                        <ButtonStrip end>
+                                        <ButtonStrip  end>
                                             <Button onClick={ onClose } primary>
                                                 Yes
                                             </Button>
-                                            <Button onClick={ onCancel } primary>
+                                            <Button onClick={ onCancel } destructive>
                                                 No
                                             </Button>
                                         </ButtonStrip>

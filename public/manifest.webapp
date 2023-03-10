@@ -3,7 +3,7 @@
   "short_name": "manage-data-for-datim",
   "name": "Manage Data for DATIM",
   "description": "DHIS2 WebApp to manage data for DATIM",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "launch_path": "index.html",
   "default_locale": "en",
   "activities": {
@@ -12,7 +12,7 @@
     }
   },
   "icons": {
-    "48": "dhis2-app-icon.png"
+    "48": "logo192.png"
   },
   "developer": {
     "name": "alex_tumwesigye@ug.jsi.com"
