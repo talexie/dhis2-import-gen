@@ -6,7 +6,7 @@ import { useQuery } from "react-query";
  */
 export const useCurrentUser = ()=>{
     const { data, isLoading } = useQuery({
-        queryKey:[`me?fields=id,username,userGroups[id,name,code]`],
+        queryKey:[`me?fields=id,username,userGroups[id,name,code],dataViewOrganisationUnits[level]`],
         refetchOnWindowFocus: false
     });
     return {

@@ -22,7 +22,8 @@ export const AppRoutes = () => {
       setIsAdmin(true);
     }
     else{
-      navigate('/upload');
+      setIsAdmin(false);
+      //navigate('/upload');
     }
   },[data,loading,navigate])
 

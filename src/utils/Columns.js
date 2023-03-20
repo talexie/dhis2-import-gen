@@ -49,13 +49,21 @@ export const dropMultiColumns =(df,columns=[])=>{
  * @param {*} ouNames 
  * @returns 
  */
-export const getOuNameHierarchy =(ouNames)=>{
+export const getOuNameHierarchy =(ouNames,maxLevel,isSameLevel=true)=>{
+
     return Object.entries(ouNames??{})?.map(([key,value])=>{
         const splitName = value?.split("/")?.filter(Boolean)?.filter(String);
         const splitNameObj = {
             'ou': key
         };
-        splitName?.forEach((n,i)=>(splitNameObj[`level${i+1}`]=n));
+        splitName?.forEach((n,i)=>{
+            if(isSameLevel){
+                splitNameObj[`level${i+1}`]=n;
+            }
+            else{
+                splitNameObj[`level${maxLevel+i}`]=n;
+            }            
+        });
         return splitNameObj;
     })
 }
@@ -172,6 +180,30 @@ export const nativeRenameLabels = (data,columns=[])=>{
     })
 }
 /**
+ * Add null value to null or undefined columns or missing
+ * @param {*} data
+ * @param {*} columns 
+ * @param {*} value 
+ * @returns 
+ */
+export const nativeReplaceNull = (data,columns=[],value="NULL_OR_UNDEFINED",missing=true)=>{
+    return map(data,(d)=>{
+        columns?.forEach((c)=>{
+            if(Object.hasOwn(d,c)){
+                if(!get(d,c)){
+                    set(d,c,value);
+                }                
+            }    
+            else{
+                if(missing){
+                    set(d,c,value);
+                }
+            }        
+        })
+        return d;
+    });
+}
+/**
  * Convert to value
  * @param {*} v 
  * @returns 
@@ -235,7 +267,35 @@ export const nativeAddLabels = (data,colName="AddColumnName",value="")=>{
         return d;
     })
 }
-
+/**
+ * Add data to labels
+ * @param {*} data 
+ * @param {*} colNames 
+ * @param {*} value 
+ * @param {*} type 
+ * @returns 
+ */
+export const nativeAddLabelValue = (data,colNames=[],value,type="TEXT")=>{
+    return map(data,(d)=>{
+        colNames?.forEach((colName)=>{
+            if(type==="BOOL"){
+                if(value === "1" || value === 1 || value === "True" || value === "TRUE"){
+                    set(d,colName,true);
+                }
+                else if(value === "0" || value === 0 || value === "False" || value === "FALSE"){
+                    set(d,colName,false);
+                }
+                else{
+                    set(d,colName,value??get(d,colName));
+                }                
+            }
+            else{
+                set(d,colName,value??get(d,colName));
+            }            
+        })
+        return d;
+    })
+}
 export const nativeSelectByDropColumns =(data,columns=[])=>{
     return map(data,(d,i)=>{
         const keys = Object.keys(d);

@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, minBy } from 'lodash';
 import { 
     aiGetDataFrame,
     aiGetColumns,
@@ -21,7 +21,8 @@ export const getDataTable = (props)=>{
         mapping,
         levels,
         mechanism,
-        key
+        key,
+        maxLevel
     } = props;
     // Start of ML 
     const dataSet = JSON.parse(data??'[]');
@@ -29,8 +30,9 @@ export const getDataTable = (props)=>{
     const start= performance.now();
     if(dataSet?.rows && !isEmpty(dataSet?.rows)){
         const dataColumns = getDataColumns(dataSet?.headers);
-        const addColumnsToData = mergeColumnsAndData(dataSet?.rows,dataColumns) 
-        const ouNameHierarchy = getOuNameHierarchy(dataSet?.metaData?.ouNameHierarchy);
+        const addColumnsToData = mergeColumnsAndData(dataSet?.rows,dataColumns);
+        const maxLevels = minBy(JSON.parse(levels??'[]'),'level')?.level;
+        const ouNameHierarchy = getOuNameHierarchy(dataSet?.metaData?.ouNameHierarchy,maxLevel,(maxLevel === maxLevels));
         const aiOuHierarchy = nativeRenameLabels(ouNameHierarchy,getOuLevelColumns(JSON.parse(levels??'[]')));
         const mappingDs = JSON.parse(mapping??'[]');
         const aiTsRenamed = nativeRenameLabels(JSON.parse(ts??'[]'),[

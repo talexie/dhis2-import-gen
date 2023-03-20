@@ -17,7 +17,7 @@ export const useOrgChildren = ({
     onComplete,
 }) => {
     const onCompleteCalledRef = useRef(false)
-    const url = node.id?[`organisationUnits/${node.id}?paging=false&fields=children[id,path,displayName]`]:false;
+    const url = node.id?[`organisationUnits/${node.id}?paging=false&fields=children[id,path,displayName,level]`]:false;
     const { isLoading:loading, error, data } = useQuery(url, {
         enabled: (url !== false)
     })

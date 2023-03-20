@@ -159,6 +159,7 @@ export const aiReplaceNull = (df,column=[],value="NULL_OR_UNDEFINED")=>{
     }
     return null;
 }
+
 /**
  * Select data frame with strict columns
  * @param {*} df 

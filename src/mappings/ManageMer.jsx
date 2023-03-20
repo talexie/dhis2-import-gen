@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@emotion/react';
-import { FileInputField, Button, Divider, NoticeBox, FileListItem, Modal, ModalContent,ModalTitle, ButtonStrip, ModalActions, CircularLoader } from '@dhis2/ui';
-import { Container, Stack } from '@mui/material';
+import { FileInputField, Divider,Button, NoticeBox, FileListItem, Modal, ModalContent,ModalTitle, ButtonStrip, ModalActions, CircularLoader } from '@dhis2/ui';
+import { Container, Stack  } from '@mui/material';
 import { useState, useRef } from 'react';
 import { useOrgUnit,PeriodField, OrgUnitControl, ImportFeedBack } from '../ui';
 import sortBy from 'lodash/sortBy';
@@ -47,6 +47,10 @@ const classes={
     success: css({
         color: 'green',
         padding:  '16px'
+    }),
+    yesb: css({
+        color: '#ffffff',
+        backgroundColor:  'green'
     })
 };
 const periodTypes = getPeriodTypes(['Monthly']);
@@ -303,33 +307,40 @@ export const ManageMer = () => {
                         }
                         {
                             revalidate?(
+
                                 <Modal onClose={onCancel} small>
-                                    <ModalTitle>
-                                        Are you submitting SMARTCARE data for:
-                                    </ModalTitle>
-                                    <ModalContent>
-                                        <Stack>
-                                            <div css={ classes.label }>Facility: { selected?.name || selected?.displayName }</div>
-                                            <div css={ classes.label }>Period: {  selectedPeriod?.label??""} </div>
-                                            <div css={ classes.success }>Please click <b>"Yes"</b> to accept and  submit data</div>
-                                            <div css={ classes.notice }><b>"No"</b> to cancel and restart the submission.</div>
-                                        </Stack>
-                                    </ModalContent>
-                                    <ModalActions>
-                                        <ButtonStrip  end>
-                                            <Button onClick={ onClose } primary>
-                                                Yes
-                                            </Button>
-                                            <Button onClick={ onCancel } destructive>
-                                                No
-                                            </Button>
-                                        </ButtonStrip>
-                                    </ModalActions>
+                                    <Stack>
+                                        <ModalTitle>
+                                            Are you submitting SMARTCARE data for:
+                                        </ModalTitle>
+                                        <ModalContent>
+                                            <Stack>
+                                                <div css={ classes.label }>Facility: { selected?.name || selected?.displayName }</div>
+                                                <div css={ classes.label }>Period: {  selectedPeriod?.label??""} </div>
+                                                <div css={ classes.success }>Please click <b>"Yes"</b> to accept and  submit data</div>
+                                                <div css={ classes.notice }><b>"No"</b> to cancel and restart the submission.</div>
+                                            </Stack>
+                                            <Stack
+                                                direction="row"
+                                                justifyContent="space-between"
+                                                alignItems="flex-start"
+                                                spacing={8}
+                                            >
+                                                <Button onClick={ onClose } style={{
+                                                    color: '#ffffff',
+                                                    backgroundColor:  'green'
+                                                } }>
+                                                    Yes
+                                                </Button>
+                                                <Button onClick={ onCancel } destructive>
+                                                    No
+                                                </Button>
+                                            </Stack>
+                                        </ModalContent>                                        
+                                    </Stack>
                                 </Modal>
                             ):null
                         }
-                        
-                        
                     </Stack>
                 ):(
                     <>

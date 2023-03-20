@@ -109,6 +109,7 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
         return getUpdate({ 
             period: period, 
             orgUnit: selected?.id,
+            level: selected?.level,
             dimensions:dimension,
             report: report,
             orgUnitGroup: orgUnitGroup,

@@ -5,10 +5,12 @@ import {
     renameDataColumns,
     aiGetUniqueInColumn,
     aiReplaceNull,
+    nativeReplaceNull,
 } from '../utils';
 import filter from 'lodash/filter';
 
 export const getFilteredMapping = (aiDs,dimension,config,report)=>{
+    console.log("DS:",aiDs);
     const frequency = report?.frequency?.toUpperCase();
     // For each dimension, filter out from DS data and do the merge
         // Gender and Age only // EQUAL TO defaultMap below
@@ -73,9 +75,9 @@ export const getFilteredMapping = (aiDs,dimension,config,report)=>{
 export const getAiDataFrame = (ds,config,dimension,report)=>{
     // Start of ML 
     if(ds){
-        const aiDs = aiGetDataFrame(ds);
-        const toFilter= aiReplaceNull(aiDs,['echoSexUid','echoAgeGroupUid','defaultUid','lessThan15AndAbove15Uid'])
-        const indMapDataF = getFilteredMapping(toFilter?toFilter.toCollection():[],dimension,config,report);
+        //const aiDs = aiGetDataFrame(ds);
+        const toFilter= nativeReplaceNull(ds,['echoSexUid','echoAgeGroupUid','defaultUid','lessThan15AndAbove15Uid'])
+        const indMapDataF = getFilteredMapping(toFilter,dimension,config,report);
         const indMapData = aiGetDataFrame(indMapDataF);
         const aiSelectedIndicators = aiGetUniqueInColumn(indMapData,'echoIndicatorUid');
         const renamedIndMapData = renameDataColumns(indMapData,[

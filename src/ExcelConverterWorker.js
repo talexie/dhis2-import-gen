@@ -1,6 +1,6 @@
 import { read, utils } from 'xlsx';
 import { get } from 'lodash';
-import { nativeMerge, nativeRenameLabels, toValue } from './utils';
+import { aiGetDataFrame, nativeAddLabelValue, nativeMerge, nativeRenameLabels, toValue } from './utils';
 
 export const createDhis2Import =(file)=>{
     const wb = read(file);
@@ -175,4 +175,82 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
             categoryOptionCombo: d?.['categoryOptionCombo']
         }
     })
+}
+export const uploadMapping = (file, type)=>{
+    const wb = read(file);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    //const dataWs = getMergeValue(ws);
+    const data = utils.sheet_to_json(ws);
+    if(type  ==="LOCATION"){
+        const renameLocationData = nativeRenameLabels(data,[]);
+        return renameLocationData;
+    }
+    else if(type  ==="INDICATOR"){
+        const renameIndicatorData = nativeRenameLabels(data,[
+            { old: 'DATIM_CODE',new:'datimCode'},
+            { old: 'dataelementuid',new:'datimUid'},
+            { old: 'ECHO - INDICATOR',new:'echoIndicatorName'},
+            { old: 'DATIM XYZ',new:'datimXyz'},
+            { old: 'HIV_STAT',new:'hivStat'},
+            { old: 'Sex',new:'sex'},
+            { old: 'Age Group',new:'ageGroup'},
+            { old: 'categoryoptioncombo',new: 'datimDisaggregation'},
+            { old: 'categoryoptioncombocode',new: 'datimDisaggregationUid'},
+            { old: 'ECHO_indicatorID',new: 'echoIndicatorUid'},
+            { old: 'echo_sex_uid',new:'echoSexUid'},
+            { old: 'echo_agegroup_uid',new:'echoAgeGroupUid'},
+            { old: 'default_uid',new:'defaultUid'},
+            { old: 'less_than_15_and_above_15_uid',new:'lessThan15AndAbove15Uid'},
+            { old: 'FY2020',new:'FY2020'},
+            { old: 'DATABASE INDICATOR',new:'databaseIndicator'},
+            { old: 'SAFE - DataElement',new:'safeDataElement'}
+        ]);
+        const aiAddIndicatorData = nativeAddLabelValue(renameIndicatorData,['FY23','FY22'],undefined,'BOOL');
+        const aiIndicatorData = aiGetDataFrame(aiAddIndicatorData);
+        const aiIndicatorDup = aiIndicatorData?aiIndicatorData.dropDuplicates():null;
+        return aiIndicatorDup?aiIndicatorDup.toCollection():[];
+    }
+    else if(type  ==="SMARTCARE"){
+        const renameSmartcareData = nativeRenameLabels(data,[
+            {
+                old:'Indicator label',
+                new:'IndicatorLegacyLabel'
+            },
+            { old: 'SMARTCARE Indicator',new:'SMARTCAREIndicator'},
+            { old: 'SMARTCARE Indicator Label',new:'SMARTCAREIndicatorLabel'},
+            { old: 'ECHODataElementName', new:'ECHODataElementName'},
+            { old: 'ECHODataElementUID', new:'ECHODataElementUID'},
+            { old: 'ECHOCategoryOptionComboName', new:'ECHOCategoryOptionComboName'},
+            { old: 'ECHOCategoryOptionComboName ', new:'ECHOCategoryOptionComboName'},
+            { old: 'ECHOCategoryOptionComnoUID',new:'ECHOCategoryOptionComboUID'}
+        ]);
+        const aiSmartcareData = aiGetDataFrame(renameSmartcareData);
+        const aiSmartcareDup = aiSmartcareData?aiSmartcareData.dropDuplicates():null;
+        return aiSmartcareDup?aiSmartcareDup.toCollection():[];
+    }
+    else{
+        return [];
+    }
+
+    
+}
+/**
+ * Store file
+ * @param {*} file 
+ * @param {*} orgUnit 
+ * @param {*} period 
+ * @returns 
+ */
+export const uploadART = (file, orgUnit, periodType,period)=>{
+    const wb = read(file);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    //const dataWs = getMergeValue(ws);
+    const data = utils.sheet_to_json(ws);
+    return {
+        orgUnit: orgUnit?.id,
+        orgUnitName: orgUnit?.displayName,
+        period: period,
+        periodType:periodType,
+        data: data
+    }
 }

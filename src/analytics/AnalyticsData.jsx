@@ -1,18 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueries } from 'react-query';
 import { GridTable } from '../ui';
 import isEmpty from 'lodash/isEmpty';
 //import { defaultQueryFn } from './App';
 import { 
     getCategoryDimensions,
-    useMergeDhis2AnalyticsData
+    useMergeDhis2AnalyticsData,
+    useUser
 } from '../utils';
 import chunk from 'lodash/chunk';
 import queryString from 'query-string';
 import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import { Container } from '@mui/system';
 import { NoticeBox } from '@dhis2/ui';
+import { minBy } from 'lodash';
 
 const createWorker = createWorkerFactory(() => import('../Worker'));
 /**
@@ -43,21 +44,23 @@ export const fetcher = (...urls) => {
  */
 export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config }) => { 
     const worker = useWorker(createWorker);
+    const { user } = useUser();
     const [message, setMessage] = React.useState(null);   
     const [clicked, setClicked] = useState(false);
     const [error,setError] = useState(false);
-    const { period:pe, dimensions, orgUnit:ou, report, orgUnitGroup, levels,submitted } = selected || {}; 
-    const hierarchy = JSON.stringify(levels); 
+    const { period:pe, dimensions, orgUnit:ou, level, report, orgUnitGroup, levels,submitted } = selected || {}; 
+    const hierarchy = JSON.stringify(levels);
     const dimension = dimensions?.dimension;
     const dim= getCategoryDimensions(dimension?.items);  
     const filterMechanism = getFilterMechanism(report);
     const mechanism = report?.mechanism; 
+    console.log("I:",indicators);
     const qsQuery =(q)=>{
         if(ou && !orgUnitGroup){
             return queryString.stringify({
                 dimension:[
                     `pe:${pe?.join(';')}`,
-                    `ou:LEVEL-6-${ou}`,
+                    `ou: ${level===6?ou:`LEVEL-6-${ou}`}`,
                     `dx:${ q?.join(';')}`
                 ].concat(dim),
                 filter: filterMechanism,
@@ -95,7 +98,7 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
         }
     }
 
-    const chunkQuery =(q)=>(((!isEmpty(pe) && !isEmpty(q) && ou) || (!isEmpty(pe) && !isEmpty(q) && orgUnitGroup)) && qsQuery(q))?`analytics.json?${qsQuery(q)}`:false;   
+    const chunkQuery =(q)=>(((!isEmpty(pe) && !isEmpty(q) && ou && !orgUnitGroup) || (!isEmpty(pe) && !isEmpty(q) && !ou && orgUnitGroup)) && qsQuery(q))?`analytics.json?${qsQuery(q)}`:false;   
     const chunkedIndicators = chunk(indicators??[],config?.chunks??15)??[];
     const urls = chunkedIndicators.map((chunkedInd)=>chunkQuery(chunkedInd)).filter(Boolean).filter(String);
     const userQueries = useQueries(urls?.map((chunked) => {
@@ -107,14 +110,16 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
         }),
     );
     const { loading, data } = useMergeDhis2AnalyticsData(userQueries);
+    const maxLevel = useMemo(()=>minBy(user?.dataViewOrganisationUnits,'level')?.level,[user?.dataViewOrganisationUnits]);
     const fetchData = useCallback(()=>{
-        if(!loading){
+        if(!loading && !error){
             return worker.getDataTable(
                {
                   ts: ts,
                   data: data,
                   mapping: mapping,
                   levels: hierarchy,
+                  maxLevel: maxLevel,
                   mechanism: mechanism,
                   key: dimension?.key
               }
@@ -136,7 +141,7 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
             setMessage(null);
             return;
         }
-    },[hierarchy,mechanism,mapping,ts,data, loading,dimension?.key,submitted]);
+    },[hierarchy,mechanism,mapping,ts,data, loading,dimension?.key,submitted,maxLevel]);
 
     // Start of ML 
     useEffect(() => {

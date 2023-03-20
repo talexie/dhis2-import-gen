@@ -12,7 +12,7 @@ export const createRootQuery = (ids) =>
                 resource: `organisationUnits`,
                 params: ({ isUserDataViewFallback }) => ({
                     isUserDataViewFallback,
-                    fields: ['displayName', 'path', 'id'],
+                    fields: ['displayName', 'path', 'id','level'],
                 }),
             },
         }),
@@ -29,7 +29,7 @@ export const createRootQuery = (ids) =>
 export const useRootOrgData = (ids, { isUserDataViewFallback } = {}) => {
     const query = createRootQuery(ids);
     const filterQuery = Object.keys(query);
-    const url = !isEmpty(filterQuery)?[`organisationUnits?filter=id:in:[${filterQuery?.join(',')}]&isUserDataViewFallback=${ isUserDataViewFallback??true}&paging=false&fields=path,id,displayName`]:false;
+    const url = !isEmpty(filterQuery)?[`organisationUnits?filter=id:in:[${filterQuery?.join(',')}]&isUserDataViewFallback=${ isUserDataViewFallback??true}&paging=false&fields=path,id,displayName,level`]:false;
     const rootOrgUnits = useQuery(url, {
         enabled: (url !== false)
     })

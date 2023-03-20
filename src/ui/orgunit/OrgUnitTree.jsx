@@ -22,7 +22,7 @@ const allRootQuery = {
         resource: 'organisationUnits',
         params: {
             filter: 'level:eq:1',
-            fields: 'id,path,displayName',
+            fields: 'id,path,displayName,level',
             paging: 'false',
         },
     },
@@ -32,7 +32,7 @@ const query = {
     data: {
         resource: 'me',
         params: {
-            fields: 'organisationUnits[id,path,displayName], authorities',
+            fields: 'organisationUnits[id,path,displayName,level], authorities',
         },
     },
 }

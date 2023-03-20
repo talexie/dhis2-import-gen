@@ -4,7 +4,9 @@ import {
     AnalyticsListTable as DataExport
   } from './analytics';
   import {
+    ManageART,
     ManageIndicatorMapping,
+    ManageMappings,
     ManageMer,
     ManageOrgUnitMapping
   } from './mappings';
@@ -43,8 +45,7 @@ export const routes = [
       children: [
         {
           path: "/",
-          element: <DataExport />,
-          userGroup: "MANAGE_DATIM_ADMIN" 
+          element: <ManageMer/>
         },
         {
           label: "Data Export",
@@ -65,9 +66,20 @@ export const routes = [
           userGroup: "MANAGE_DATIM_ADMIN" 
         },
         {
+          label: "Upload Mapping",
+          path: "uploadmapping",
+          element: <ManageMappings />,
+          userGroup: "MANAGE_DATIM_ADMIN" 
+        },
+        {
           label: "SMARTCARE",
           path: "upload",
           element: <ManageMer/>
+        },
+        {
+          label: "ART Register",
+          path: "artupload",
+          element: <ManageART/>
         }
       ]
     }
