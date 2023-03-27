@@ -53,14 +53,13 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
     const dimension = dimensions?.dimension;
     const dim= getCategoryDimensions(dimension?.items);  
     const filterMechanism = getFilterMechanism(report);
-    const mechanism = report?.mechanism; 
-    console.log("I:",indicators);
+    const mechanism = report?.mechanism;
     const qsQuery =(q)=>{
-        if(ou && !orgUnitGroup){
+        if(ou && Array.isArray(orgUnitGroup) && orgUnitGroup.length === 0){
             return queryString.stringify({
                 dimension:[
                     `pe:${pe?.join(';')}`,
-                    `ou: ${level===6?ou:`LEVEL-6-${ou}`}`,
+                    `ou:${level===6?ou:`LEVEL-6-${ou}`}`,
                     `dx:${ q?.join(';')}`
                 ].concat(dim),
                 filter: filterMechanism,
@@ -74,7 +73,7 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
                 skipNulls: true 
             }); 
         }
-        else if(ou && orgUnitGroup){
+        else if(ou && Array.isArray(orgUnitGroup) && orgUnitGroup.length > 0){
             setError(true);
             return undefined;
         }
@@ -98,7 +97,7 @@ export const AnalyticsData = React.memo(({ ts,indicators,mapping,selected,config
         }
     }
 
-    const chunkQuery =(q)=>(((!isEmpty(pe) && !isEmpty(q) && ou && !orgUnitGroup) || (!isEmpty(pe) && !isEmpty(q) && !ou && orgUnitGroup)) && qsQuery(q))?`analytics.json?${qsQuery(q)}`:false;   
+    const chunkQuery =(q)=>(((!isEmpty(pe) && !isEmpty(q) && ou && Array.isArray(orgUnitGroup) && orgUnitGroup.length === 0) || (!isEmpty(pe) && !isEmpty(q) && !ou && Array.isArray(orgUnitGroup) && orgUnitGroup.length > 0)) && qsQuery(q))?`analytics.json?${qsQuery(q)}`:false;   
     const chunkedIndicators = chunk(indicators??[],config?.chunks??15)??[];
     const urls = chunkedIndicators.map((chunkedInd)=>chunkQuery(chunkedInd)).filter(Boolean).filter(String);
     const userQueries = useQueries(urls?.map((chunked) => {

@@ -37,13 +37,12 @@ const classes={
         padding:  '16px'
     })
 };
-const periodTypes = getPeriodTypes(['Monthly']);
 
 export const postData = async({body})=>{
     const fetchBody = JSON.stringify(body);
-    const url = `../../dataStore/terminology/artuploads`;
+    const url = `../../tracker?async=false`;
     const response = await fetch(url, {
-      method: "PUT",
+      method: "POST",
       body: fetchBody,
       headers: {
         "Content-type": "application/json"
@@ -51,7 +50,21 @@ export const postData = async({body})=>{
     });
     let res = await response.json();
     return res;
-  }
+}
+export const postFile = async(file)=>{
+    const url = `../../fileResources`;
+    const formData = new FormData();
+    formData.append('file',file);
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "accept": "application/json"
+      }
+    });
+    let res = await response.json();
+    return res;
+}
 
   
 export const ManageART = () => {   
@@ -61,18 +74,15 @@ export const ManageART = () => {
     const [file, setFile ] = useState(undefined);
     const [submitted, setSubmitted] = useState(false);
     const [fileName, setFileName ] = useState(undefined);
+    const [fileId, setFileId ] = useState(undefined);
     const [message,setMessage] = useState("");
-    const [periodType, setPeriodType ] = useState(undefined);
-    const [period, setPeriod ] = useState(undefined);
-    const [periods, setPeriods ] = React.useState([]);
     const [selected, setSelected ] = React.useState([]);
-    const { canResubmit } = useUser();
     const { organisationUnitId, handleOrganisationUnitChange} = useOrgUnit();
     const { mutate, isLoading:posting } = useMutation(postData, {
         onSuccess: data => {
             setMessage(data);
             if(data?.status ==="OK"){
-                alert(data?.message);
+                //setFileId(data?.message);
                 setSubmitted(false);
             }
             else{
@@ -87,19 +97,33 @@ export const ManageART = () => {
           queryClient.invalidateQueries('create');
         }
       });
+      const { mutate:mutateFile, isLoading:postingFile } = useMutation(postFile, {
+        onSuccess: data => {
+            setMessage(data);
+            if(data?.status ==="OK"){
+                setFileId(data?.response?.fileResource);
+            }       
+        },
+        onError: () => {
+          alert("There was an error");
+        },
+        onSettled: () => {
+          queryClient.invalidateQueries('create');
+        }
+      });
     const submitData = async ()=>{
         setSubmitted(true);
-        const dataValues = await workerFile.uploadART(file,selected, periodType, period);
+        const dataValues = await workerFile.uploadART(selected,fileId);
         mutate({body: dataValues});     
     }
     const onChange =(fileObject,_e)=>{ 
-        const {  files } = fileObject;        
+        const {  files } = fileObject; 
+        mutateFile(files[0]);      
         setFileName(files[0]?.name);
         const fileReader = new FileReader();
         fileReader.readAsArrayBuffer(files[0]);
         fileReader.onload = e => {
             setFile(e?.target?.result);
-            console.log("File:",e?.target?.result);
         };
     }
     const onRemove =()=>{   
@@ -112,15 +136,7 @@ export const ManageART = () => {
     const handleClose =(_e)=>{
         setOpen(false);
     }
-    const onChangePeriodType=({selected})=>{
-        setPeriod(undefined);
-        setPeriodType(selected);        
-        const generatedPeriods = generatePeriods(selected,!canResubmit);
-        setPeriods(generatedPeriods);
-    }
-    const onChangePeriod=({ selected })=>{
-        setPeriod(selected);  
-    }
+
     const getOrgUnit =(value)=>{
         setSelected(value);
     }
@@ -129,12 +145,12 @@ export const ManageART = () => {
             <Stack spacing= {2} alignItems={ 'flex-start'}>
                 <h3>Upload ART Register</h3>
                 <Divider/>  
-                <NoticeBox title={"How to submit mappings"}>
-                    Upload the ART Register file to save.
+                <NoticeBox title={"How to submit ART Register"}>
+                    Upload the ART Register file to save. Upon upload, the "First Name" column will be automatically removed so that no patient identifiable data is imported into the system.
                 </NoticeBox>
                 
                 {
-                    !posting?(
+                    !(posting || postingFile)?(
                         <ImportFeedBack 
                             type={ message?.status }
                             message = { message }
@@ -163,24 +179,7 @@ export const ManageART = () => {
                                     
                         ): null
                     }
-                </div>     
-                <Divider/>  
-                <PeriodField
-                    data ={ sortBy(periodTypes,'label') }
-                    placeholder= { `Select Period Type` }
-                    onChange = { onChangePeriodType }
-                    selected = { periodType }
-                    input = { periodType }
-                    
-                />
-                <Divider/>  
-                <PeriodField      
-                    data ={ sortBy(periods,"value") }
-                    placeholder= { `Select Period` }
-                    onChange = { onChangePeriod }
-                    selected = { period }
-                    multi = { false }
-                />          
+                </div>              
                 <Divider/>         
                 <FileInputField
                     helpText="Please upload the file used for mapping (only csv or Excel)"

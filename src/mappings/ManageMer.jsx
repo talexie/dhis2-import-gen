@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css } from '@emotion/react';
-import { FileInputField, Divider,Button, NoticeBox, FileListItem, Modal, ModalContent,ModalTitle, ButtonStrip, ModalActions, CircularLoader } from '@dhis2/ui';
+import { FileInputField, Divider, Button, NoticeBox, FileListItem, Modal, ModalContent,ModalTitle, CircularLoader } from '@dhis2/ui';
 import { Container, Stack  } from '@mui/material';
 import { useState, useRef } from 'react';
 import { useOrgUnit,PeriodField, OrgUnitControl, ImportFeedBack } from '../ui';
@@ -10,6 +10,7 @@ import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import DataGrid from 'react-data-grid';
 import { useQuery, useQueryClient, useMutation } from 'react-query';
+import style from './styles.css';
 
 const columns = [
   { key: 'A', name: 'A', resizable: true, sortable: true, frozen: true },
@@ -326,10 +327,7 @@ export const ManageMer = () => {
                                                 alignItems="flex-start"
                                                 spacing={8}
                                             >
-                                                <Button onClick={ onClose } style={{
-                                                    color: '#ffffff',
-                                                    backgroundColor:  'green'
-                                                } }>
+                                                <Button onClick={ onClose } primary className={style.primary}>
                                                     Yes
                                                 </Button>
                                                 <Button onClick={ onCancel } destructive>

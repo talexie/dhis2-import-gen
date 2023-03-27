@@ -1,6 +1,7 @@
 import { read, utils } from 'xlsx';
 import { get } from 'lodash';
-import { aiGetDataFrame, nativeAddLabelValue, nativeMerge, nativeRenameLabels, toValue } from './utils';
+import { aiGetDataFrame, nativeAddLabelValue, nativeMerge, nativeRenameLabels, nativeReplaceNull, toValue } from './utils';
+import { format } from 'date-fns';
 
 export const createDhis2Import =(file)=>{
     const wb = read(file);
@@ -59,9 +60,6 @@ export const fillMerges=(ws)=>{
       start: utils.encode_cell(merge?.s),
       end: utils.encode_cell(merge?.e),
     }));
-
-    // console.log(JSON.stringify(mergesMap, undefined, 2));
-
     for (const merge of mergesMap) {
       const cells = getCellsForHorizontalRange(merge);
       if (ws[merge?.start]) {
@@ -179,8 +177,8 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
 export const uploadMapping = (file, type)=>{
     const wb = read(file);
     const ws = wb.Sheets[wb.SheetNames[0]];
-    //const dataWs = getMergeValue(ws);
-    const data = utils.sheet_to_json(ws);
+    const dataWs = getMergeValue(ws);
+    const data = utils.sheet_to_json(dataWs,{ defval:""});
     if(type  ==="LOCATION"){
         const renameLocationData = nativeRenameLabels(data,[]);
         return renameLocationData;
@@ -221,7 +219,7 @@ export const uploadMapping = (file, type)=>{
             { old: 'ECHODataElementName', new:'ECHODataElementName'},
             { old: 'ECHODataElementUID', new:'ECHODataElementUID'},
             { old: 'ECHOCategoryOptionComboName', new:'ECHOCategoryOptionComboName'},
-            { old: 'ECHOCategoryOptionComboName ', new:'ECHOCategoryOptionComboName'},
+            { old: 'ECHOCategoryOptionComboName ', new:'ECHOCategoryOptionComboName '},
             { old: 'ECHOCategoryOptionComnoUID',new:'ECHOCategoryOptionComboUID'}
         ]);
         const aiSmartcareData = aiGetDataFrame(renameSmartcareData);
@@ -241,16 +239,23 @@ export const uploadMapping = (file, type)=>{
  * @param {*} period 
  * @returns 
  */
-export const uploadART = (file, orgUnit, periodType,period)=>{
-    const wb = read(file);
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    //const dataWs = getMergeValue(ws);
-    const data = utils.sheet_to_json(ws);
+export const uploadART = (orgUnit,fileId)=>{
     return {
-        orgUnit: orgUnit?.id,
-        orgUnitName: orgUnit?.displayName,
-        period: period,
-        periodType:periodType,
-        data: data
+        events:[
+            {
+                orgUnit: orgUnit?.id,
+                occurredAt: format(new Date(),"yyyy-MM-dd"),
+                completedAt: format(new Date(),"yyyy-MM-dd"),
+                dataValues:[
+                    {
+                        dataElement:"CYHDjier8OI",
+                        value: fileId?.id
+                    }
+                ],
+                program: "j1plKUVQMq4",
+                programStage: "tVKomFeeL2W",
+                status: "COMPLETED"
+            }
+        ]
     }
 }

@@ -187,7 +187,8 @@ export const nativeRenameLabels = (data,columns=[])=>{
  * @returns 
  */
 export const nativeReplaceNull = (data,columns=[],value="NULL_OR_UNDEFINED",missing=true)=>{
-    return map(data,(d)=>{
+    const dataToReplace = data;
+    return map(dataToReplace,(d)=>{
         columns?.forEach((c)=>{
             if(Object.hasOwn(d,c)){
                 if(!get(d,c)){
@@ -245,10 +246,6 @@ export const toValue =(v)=>{
  */
 export const nativeDropLabels = (data,columns=[])=>{
     return map(data,(d)=>{
-        /*columns?.forEach((c)=>{
-            delete d?.[c?.old];
-        });
-        return d;*/
         return omit(d,columns);
         
     })

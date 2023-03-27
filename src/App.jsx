@@ -4,13 +4,13 @@ import {
     AnalyticsListTable as DataExport
   } from './analytics';
   import {
+    DownloadART,
     ManageART,
     ManageIndicatorMapping,
     ManageMappings,
     ManageMer,
     ManageOrgUnitMapping
   } from './mappings';
-  import { Setup } from './manage';
 import {
     createHashRouter,
     RouterProvider,
@@ -72,12 +72,18 @@ export const routes = [
           userGroup: "MANAGE_DATIM_ADMIN" 
         },
         {
+          label: "Download ART Register",
+          path: "downloadart",
+          element: <DownloadART />,
+          userGroup: "MANAGE_DATIM_ADMIN" 
+        },
+        {
           label: "SMARTCARE",
           path: "upload",
           element: <ManageMer/>
         },
         {
-          label: "ART Register",
+          label: "Upload ART Register",
           path: "artupload",
           element: <ManageART/>
         }
