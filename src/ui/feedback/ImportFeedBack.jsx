@@ -28,6 +28,27 @@ export const ImportFeedBack = (props)=>{
             </NoticeBox>
         )
     }
+    else if(type === 'TRACKER'){
+        return(
+            <NoticeBox warning title={ title??"Events status"}>
+                <Stack>
+                    <div>Created: { message?.created} </div>
+                    <div>Updated: { message?.updated} </div>
+                    <div>Ignored: { message?.ignored} </div>
+                    <div>Deleted: { message?.deleted} </div>
+                </Stack>
+            </NoticeBox>
+        )
+    }
+    else if(type === 'FILE'){
+        return(
+            <NoticeBox warning title={ title??"File Upload status"}>
+                <Stack>
+                    <div>{ message } </div>
+                </Stack>
+            </NoticeBox>
+        )
+    }
     else{
         return null;
     }

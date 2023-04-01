@@ -9,6 +9,7 @@ import 'react-data-grid/lib/styles.css';
 import { useQueryClient, useMutation } from 'react-query';
 import { generatePeriods, getPeriodTypes, useUser } from '../utils';
 import { sortBy } from 'lodash';
+import { format } from 'date-fns';
 
 const createWorker = createWorkerFactory(() => import('../ExcelConverterWorker'));
 
@@ -51,13 +52,26 @@ export const postData = async({body})=>{
     let res = await response.json();
     return res;
 }
-export const postFile = async(file)=>{
+export const postFile = async({ file, fileName, selected } )=>{
     const url = `../../fileResources`;
+    const blob = new Blob([new Uint8Array(file)], {type:"application/octet-stream"});
     const formData = new FormData();
-    formData.append('file',file);
+    formData.append('file',blob,fileName??`ART Register_${selected?.displayName??""}_${format(new Date(),'yyyy-MM-dd')}.xlsx`);
     const response = await fetch(url, {
       method: "POST",
       body: formData,
+      headers: {
+        "accept": "application/json"
+      }
+    });
+    let res = await response.json();
+    return res;
+}
+export const deleteFile = async(file)=>{
+    const url = `../../fileResources/${file}`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: new FormData(),
       headers: {
         "accept": "application/json"
       }
@@ -72,6 +86,8 @@ export const ManageART = () => {
     const queryClient = useQueryClient();
     const [open, setOpen ] = useState(false); 
     const [file, setFile ] = useState(undefined);
+    const [type, setType ] = useState(undefined);
+    const [uploaded,setUploaded] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [fileName, setFileName ] = useState(undefined);
     const [fileId, setFileId ] = useState(undefined);
@@ -80,12 +96,30 @@ export const ManageART = () => {
     const { organisationUnitId, handleOrganisationUnitChange} = useOrgUnit();
     const { mutate, isLoading:posting } = useMutation(postData, {
         onSuccess: data => {
-            setMessage(data);
+            setType("TRACKER");
+            setMessage(data?.stats);
             if(data?.status ==="OK"){
-                //setFileId(data?.message);
                 setSubmitted(false);
             }
             else{
+                setSubmitted(false);
+            }       
+        },
+        onError: (error) => {
+          alert("There was an error");
+          setSubmitted(false);
+        },
+        onSettled: () => {
+          queryClient.invalidateQueries('create');
+        }
+      });
+      const { mutate:mutateFile, isLoading:postingFile } = useMutation(postFile, {
+        onSuccess: data => {
+            setType("FILE");
+            setUploaded(true);
+            if(data?.status ==="OK"){
+                setMessage("File has been uploaded successfully.");
+                setFileId(data?.response?.fileResource);
                 setSubmitted(false);
             }       
         },
@@ -97,15 +131,18 @@ export const ManageART = () => {
           queryClient.invalidateQueries('create');
         }
       });
-      const { mutate:mutateFile, isLoading:postingFile } = useMutation(postFile, {
+      const { mutate:mutateRemoveFile } = useMutation(deleteFile, {
         onSuccess: data => {
-            setMessage(data);
+            setType("FILE");
             if(data?.status ==="OK"){
-                setFileId(data?.response?.fileResource);
+                setMessage("File has been removed successfully.");
+                setSubmitted(false);
+                setUploaded(false);
             }       
         },
         onError: () => {
           alert("There was an error");
+          setSubmitted(false);
         },
         onSettled: () => {
           queryClient.invalidateQueries('create');
@@ -113,20 +150,34 @@ export const ManageART = () => {
       });
     const submitData = async ()=>{
         setSubmitted(true);
-        const dataValues = await workerFile.uploadART(selected,fileId);
-        mutate({body: dataValues});     
+        if(fileId?.id){
+            const dataValues = await workerFile.uploadART(selected,fileId);
+            mutate({body: dataValues});
+        }
+        else{
+            setType("FILE");
+            setMessage("Saving the file has failed.");
+            setUploaded(false);  
+        }     
     }
-    const onChange =(fileObject,_e)=>{ 
-        const {  files } = fileObject; 
-        mutateFile(files[0]);      
+    const onChange = (fileObject,_e)=>{
+        _e.preventDefault(); 
+        setSubmitted(true);
+        const {  files } = fileObject;      
         setFileName(files[0]?.name);
         const fileReader = new FileReader();
         fileReader.readAsArrayBuffer(files[0]);
-        fileReader.onload = e => {
+        fileReader.onload = async(e) => {
+            setSubmitted(true);
             setFile(e?.target?.result);
+            mutateFile( {file: await workerFile.getUploadFile(e?.target?.result),fileName:fileName, selected: selected});
         };
     }
-    const onRemove =()=>{   
+    const onRemove =()=>{ 
+        if(fileId?.id){
+            mutateRemoveFile(fileId?.id);
+            setUploaded(false);  
+        }       
         setFile(undefined);
         setFileName(undefined);
     }
@@ -152,7 +203,7 @@ export const ManageART = () => {
                 {
                     !(posting || postingFile)?(
                         <ImportFeedBack 
-                            type={ message?.status }
+                            type={ type }
                             message = { message }
                         />
                     ):(
@@ -185,8 +236,11 @@ export const ManageART = () => {
                     helpText="Please upload the file used for mapping (only csv or Excel)"
                     label="Upload ART Register"
                     name="uploadName"
-                    required= { true}
+                    required= { true }
+                    multiple = { false }
+                    accept = { `.xlsx,.xlsb,.xlsm,.xls,.csv,.xltx,.xltm`}
                     onChange={onChange}
+                    validationText = { uploaded?"File has been saved.": "File not yet uploaded." }
                 >
                     {
                         fileName?(

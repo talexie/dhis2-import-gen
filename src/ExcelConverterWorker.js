@@ -1,6 +1,6 @@
-import { read, utils } from 'xlsx';
+import { read, utils, write } from 'xlsx';
 import { get } from 'lodash';
-import { aiGetDataFrame, nativeAddLabelValue, nativeMerge, nativeRenameLabels, nativeReplaceNull, toValue } from './utils';
+import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeRenameLabels, nativeReplaceNull, toValue } from './utils';
 import { format } from 'date-fns';
 
 export const createDhis2Import =(file)=>{
@@ -234,7 +234,6 @@ export const uploadMapping = (file, type)=>{
 }
 /**
  * Store file
- * @param {*} file 
  * @param {*} orgUnit 
  * @param {*} period 
  * @returns 
@@ -258,4 +257,20 @@ export const uploadART = (orgUnit,fileId)=>{
             }
         ]
     }
+}
+/**
+ * Get upload file
+ * @param {*} orgUnit 
+ * @param {*} period 
+ * @returns 
+ */
+export const getUploadFile = (file)=>{
+    const wb = read(file);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const dataWs = getMergeValue(ws);
+    const data = utils.sheet_to_json(dataWs, { header: "A"});
+    const dropData = nativeDropLabels(data,['F']);
+    const worksheet = utils.json_to_sheet(dropData, { skipHeader: true });
+    wb.Sheets[wb.SheetNames[0]] = worksheet;
+    return write(wb, {bookType: 'xlsx', type: 'array'});
 }
