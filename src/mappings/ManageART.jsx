@@ -56,7 +56,7 @@ export const postFile = async({ file, fileName, selected } )=>{
     const url = `../../fileResources`;
     const blob = new Blob([new Uint8Array(file)], {type:"application/octet-stream"});
     const formData = new FormData();
-    formData.append('file',blob,fileName??`ART Register_${selected?.displayName??""}_${format(new Date(),'yyyy-MM-dd')}.xlsx`);
+    formData.append('file',blob,fileName??`ART Register_${selected?.parent?.name??''}_${selected?.displayName??""}_${format(new Date(),'yyyy-MM-dd')}.xlsx`);
     const response = await fetch(url, {
       method: "POST",
       body: formData,
@@ -225,6 +225,8 @@ export const ManageART = () => {
                                     onChange={handleOrganisationUnitChange}
                                     open = { open }
                                     handleClose = { handleClose }
+                                    selectionLevel = { [6] }
+                                    enableSelectionLevel ={ true }
                                 />
                             </div>
                                     

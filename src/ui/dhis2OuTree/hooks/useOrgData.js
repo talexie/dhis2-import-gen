@@ -10,7 +10,7 @@ export const useOrgData = (id, { displayName },isUserDataViewFallback) => {
     if (!displayName) {
         throw new Error('"displayName" is required')
     }
-    const url = id?[`organisationUnits/${ id }?paging=false&fields=path,id,displayName,level,children::size&isUserDataViewFallback=${isUserDataViewFallback??true}`]:false;
+    const url = id?[`organisationUnits/${ id }?paging=false&fields=path,id,displayName,level,children::size,parent[name]&isUserDataViewFallback=${isUserDataViewFallback??true}`]:false;
     const {
         isLoading:loading,
         error,

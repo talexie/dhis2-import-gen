@@ -144,6 +144,7 @@ export const AnalyticsHeader = React.memo(({ getUpdate,config }) => {
                                                 onChange={handleOrganisationUnitChange}
                                                 open = { open }
                                                 handleClose = { handleClose }
+                                                enableSelectionLevel ={ false }
                                             />
                                         </div>
                                               

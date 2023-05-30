@@ -38,7 +38,9 @@ export const LocationNodeChildren = ({
     LocationNode,
     getNode,
     filterQuery,
-    maxLevel 
+    maxLevel,
+    selectionLevel,
+    enableSelectionLevel
 }) => {
     const orgChildren = useOrgChildren({
         node,
@@ -68,7 +70,7 @@ export const LocationNodeChildren = ({
                     return (
                         <LocationNode
                             autoExpandLoadingError={autoExpandLoadingError}
-                            disableSelection={disableSelection}
+                            disableSelection={disableSelection }
                             displayName={child.displayName}
                             expanded={expanded}
                             filter={filter}
@@ -91,6 +93,8 @@ export const LocationNodeChildren = ({
                             getNode ={ getNode }
                             filterQuery = { filterQuery }
                             maxLevel = { maxLevel}
+                            selectionLevel = { selectionLevel }
+                            enableSelectionLevel= { enableSelectionLevel }
                         />
                     )
                 })}

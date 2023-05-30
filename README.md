@@ -24,3 +24,8 @@
 
    3. Create a user group with the code *`MANAGE_DATIM_ADMIN`*. 
    Add all users who need to  have access to the Manage Data for DATIM export modules, mappings and Smartcare upload. By default, any user who belongs to user group *`ZM_CORE_TEAM`* will have access to all Manage Data for DATIM app modules.
+
+## Changelog
+ ### version 0.2.1
+   - Added support for skipping TX_NEW for quarterly smartcare upload
+   - Added support for restricting the organisation Unit to only a level for data entry 

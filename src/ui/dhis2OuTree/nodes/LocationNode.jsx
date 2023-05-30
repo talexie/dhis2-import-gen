@@ -33,7 +33,9 @@ export const LocationNode = ({
     onExpand,
     getNode,
     filterQuery,
-    maxLevel
+    maxLevel,
+    selectionLevel,
+    enableSelectionLevel
 }) => {
     const orgData = useOrgData(id, 
         {
@@ -87,6 +89,8 @@ export const LocationNode = ({
         label: displayName,
         checked: isSelected,
         highlighted: isHighlighted,
+        selectionLevel,
+        enableSelectionLevel
     })
 
     const label = (
@@ -102,10 +106,12 @@ export const LocationNode = ({
             hasChildren={hasChildren}
             highlighted={isHighlighted}
             onToggleOpen={onToggleOpen}
-            disableSelection={disableSelection}
+            disableSelection={ disableSelection }
             singleSelection={singleSelection}
             hasSelectedDescendants={hasSelectedDescendants}
             getNode = { getNode }
+            selectionLevel= { selectionLevel }
+            enableSelectionLevel ={ enableSelectionLevel}
         >
             {labelContent}
         </Label>
@@ -144,7 +150,7 @@ export const LocationNode = ({
                     LocationNode={LocationNode}
                     node={node}
                     autoExpandLoadingError={autoExpandLoadingError}
-                    disableSelection={disableSelection}
+                    disableSelection={disableSelection }
                     expanded={expanded}
                     filter={filter}
                     highlighted={highlighted}
@@ -162,6 +168,8 @@ export const LocationNode = ({
                     getNode ={ getNode }
                     filterQuery ={filterQuery }
                     maxLevel = { maxLevel }
+                    selectionLevel = { selectionLevel }
+                    enableSelectionLevel ={ enableSelectionLevel}
                 />
             )}
         </LabelNode>

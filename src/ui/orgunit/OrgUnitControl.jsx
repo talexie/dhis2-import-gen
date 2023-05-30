@@ -36,7 +36,16 @@ const card = css({
  */
 
 export const OrgUnitControl = (props) => {
-  const { open, handleClose, multiselect = false, onChange, getSelected, onBlur=()=>{} } = props;
+  const { 
+    open, 
+    handleClose, 
+    selectionLevel,
+    enableSelectionLevel=false,
+    multiselect = false, 
+    onChange, 
+    getSelected, 
+    onBlur=()=>{} 
+  } = props;
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [selected, setSelected] = useState([]);
@@ -182,6 +191,8 @@ return (
                         expanded={expanded}
                         handleExpand={handleExpand}
                         handleCollapse={handleCollapse}
+                        selectionLevel ={ selectionLevel }
+                        enableSelectionLevel={ enableSelectionLevel}
                       />
                     }
                   </div>

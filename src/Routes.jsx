@@ -18,7 +18,7 @@ export const AppRoutes = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(()=>{
-    if((getUserGroup(data?.userGroups,'MANAGE_DATIM_ADMIN') || getUserGroup(data?.userGroups,'ZM_CORE_TEAM' )) && !loading){
+    if(getUserGroup(data?.userGroups,'MANAGE_DATIM_ADMIN') && !loading){
       setIsAdmin(true);
     }
     else{
@@ -42,7 +42,7 @@ export const AppRoutes = () => {
       <UserContext.Provider value={ {
         user: data,
         isAdmin: isAdmin,
-        canResubmit: (getUserGroup(data?.userGroups,'MANAGE_DATIM_ADMIN') || getUserGroup(data?.userGroups,'ZM_CORE_TEAM' ) || getUserGroup(data?.userGroups,'ZM_SMARTCARE_ADMIN' ))
+        canResubmit: getUserGroup(data?.userGroups,'ZM_SMARTCARE_ADMIN' )
       }}>
         <div css ={ root }>
           <NavTabs

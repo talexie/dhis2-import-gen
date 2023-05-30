@@ -243,6 +243,8 @@ export const ManageMer = () => {
                                             onChange={handleOrganisationUnitChange}
                                             open = { open }
                                             handleClose = { handleClose }
+                                            selectionLevel = { [6] }
+                                            enableSelectionLevel={ true }
                                         />
                                     </div>
                                             

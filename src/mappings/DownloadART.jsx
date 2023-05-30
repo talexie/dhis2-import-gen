@@ -55,7 +55,7 @@ export const DownloadART = () => {
 
         files.forEach((url)=> {
         console.log(url);
-        const  filename = `ART_Register_${url?.orgUnitName}_${url?.occurredAt?.split('T')?.[0]}_${url?.event}.xlsx`;
+        const  filename = `ART_Register_${selected?.parent?.name??''}_${url?.orgUnitName}_${url?.occurredAt?.split('T')?.[0]}_${url?.event}.xlsx`;
        
         // loading a file and add it in a zip file
         JSZipUtils.getBinaryContent(
@@ -121,6 +121,7 @@ export const DownloadART = () => {
                                     onChange={handleOrganisationUnitChange}
                                     open = { open }
                                     handleClose = { handleClose }
+                                    enableSelectionLevel ={ false }
                                 />
                             </div>
                                     

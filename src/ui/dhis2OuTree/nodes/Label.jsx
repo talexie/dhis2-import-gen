@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { orgUnitPathPropType } from '../util';
+import { orgUnitPathPropType, enableLevelSelection } from '../util';
 import { DisabledSelectionLabel } from './DisabledSelectionLabel';
 import { IconizedCheckbox } from './IconizedCheckbox';
 import { LabelContainer } from './LabelContainer';
@@ -49,7 +49,9 @@ const Label = ({
     rootId,
     selected,
     singleSelection,
-    getNode
+    getNode,
+    selectionLevel,
+    enableSelectionLevel = false
 }) => {
     const onClick = ({ checked }, event) => {
         const newSelected = createNewSelected({
@@ -72,8 +74,7 @@ const Label = ({
         onChange(payload, event);
         getNode(payload);
     }
-
-    if (disableSelection) {
+    if (disableSelection || enableLevelSelection(node?.level,selectionLevel,enableSelectionLevel)) {
         return (
             <LabelContainer highlighted={highlighted}>
                 <DisabledSelectionLabel

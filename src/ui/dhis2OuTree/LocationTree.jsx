@@ -40,7 +40,9 @@ export const LocationTree = ({
     loading,
     getNode,
     filterQuery,
-    maxLevel
+    maxLevel,
+    selectionLevel,
+    enableSelectionLevel
 }) => {
     const rootNodes = getRootNodes(roots??[]);
     const rootIds = filterRootIds(
@@ -83,7 +85,7 @@ export const LocationTree = ({
                             key={rootNode.path}
                             rootId={rootNode?.path}
                             autoExpandLoadingError={autoExpandLoadingError}
-                            disableSelection={disableSelection}
+                            disableSelection={disableSelection }
                             displayName={rootNode?.displayName || ''}
                             expanded={expanded}
                             highlighted={highlighted}
@@ -104,6 +106,8 @@ export const LocationTree = ({
                             getNode = { getNode }
                             filterQuery = { filterQuery }
                             maxLevel = { maxLevel }
+                            selectionLevel= { selectionLevel }
+                            enableSelectionLevel={ enableSelectionLevel }
                         />
                     )
                 })}
@@ -117,5 +121,5 @@ LocationTree.defaultProps = {
     highlighted: [],
     initiallyExpanded: [],
     selected: [],
-    renderNodeLabel: defaultRenderNodeLabel,
+    renderNodeLabel: defaultRenderNodeLabel
 }

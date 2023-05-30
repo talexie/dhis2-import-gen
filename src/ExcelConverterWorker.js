@@ -164,15 +164,24 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
     ]);
     const filteredData = renameMergedData?.filter((f)=>Object.hasOwn(f,'dataElement') && Object.hasOwn(f,'categoryOptionCombo') && get(f,'dataElement') && get(f,'categoryOptionCombo') && (toValue(get(f,'value')) > -1));
     return filteredData?.map((d)=>{
-        return {
-            orgUnit : orgUnit,
-            period :period,
-            attributeOptionCombo: aoc,
-            value: toValue(d?.['value']),
-            dataElement: d?.['dataElement'],
-            categoryOptionCombo: d?.['categoryOptionCombo']
+        if(toValue(d?.['value']) || toValue(d?.['value']) === 0 ){
+            if( d?.['dataElement'] === "V9CDyyQLlzG" && (period?.includes('03') ||  period?.includes('06') || period?.includes('09') || period?.includes('12'))){
+                return undefined;
+            }
+            return {
+                orgUnit : orgUnit,
+                period :period,
+                attributeOptionCombo: aoc,
+                value: toValue(d?.['value']),
+                dataElement: d?.['dataElement'],
+                categoryOptionCombo: d?.['categoryOptionCombo']
+            }
+
         }
-    })
+        else{
+            return undefined;
+        }
+    }).filter(Boolean).filter(String);
 }
 export const uploadMapping = (file, type)=>{
     const wb = read(file);

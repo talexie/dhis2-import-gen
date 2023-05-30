@@ -131,3 +131,22 @@ export const computeChildNodes = (node, filter=[]) => {
 export const getRootNodes =(roots=[])=>{
     return roots?.map((root)=>root?.id).filter(Boolean).filter(String);
 } 
+/**
+ * Determine if a certain level is enabled for selection
+ * @param level
+ * @param selectionLevel
+ * @param enabled
+ */
+export const enableLevelSelection =(level,selectionLevel,enabled)=>{
+    if(enabled){
+        if( selectionLevel?.includes(level)){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    else{
+        return false;
+    }
+}
