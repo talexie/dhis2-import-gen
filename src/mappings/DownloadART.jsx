@@ -48,14 +48,15 @@ export const DownloadART = () => {
     const { data: fileResources, error:fileResourcesError, isLoading } = useQuery({
         queryKey: [`tracker/events.json?program=j1plKUVQMq4&skipPaging=true&fields=completedAt,occurredAt,orgUnit,orgUnitName,event,dataValues[dataElement,value]${dateFilter}${selected?.id?`&ouMode=DESCENDANTS&orgUnit=${selected?.id}`:``}`]
     });
+    
     const getZipFile =async(files)=>{
         const zip = new JSZip();
         let count = 0;
-        const zipFilename = `ART_Registers_${ format(new Date(),'yyyy-MM-dd')}.zip`;
+        const zipFilename = `ART_Registers_${(selected?.name || selected?.displayName)??''}_${ format(new Date(),'yyyy-MM-dd')}.zip`;
 
         files.forEach((url)=> {
-        console.log(url);
-        const  filename = `ART_Register_${selected?.parent?.name??''}_${url?.orgUnitName}_${url?.occurredAt?.split('T')?.[0]}_${url?.event}.xlsx`;
+        const parentName =  (selected?.id === url?.orgUnit)?selected?.parent?.name: (selected?.name || selected?.displayName);
+        const  filename = `ART_Register_${ parentName??''}_${url?.orgUnitName}_${url?.occurredAt?.split('T')?.[0]}_${url?.event}.xlsx`;
        
         // loading a file and add it in a zip file
         JSZipUtils.getBinaryContent(
