@@ -163,9 +163,59 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
         }
     ]);
     const filteredData = renameMergedData?.filter((f)=>Object.hasOwn(f,'dataElement') && Object.hasOwn(f,'categoryOptionCombo') && get(f,'dataElement') && get(f,'categoryOptionCombo') && (toValue(get(f,'value')) > -1));
-    return filteredData?.map((d)=>{
+    const txNo50Data = filteredData?.filter((d)=>d?.['dataElement'] !== "V9CDyyQLlzG" );
+    const tx50Data = filteredData?.filter((d)=>d?.['dataElement'] === "V9CDyyQLlzG" );
+    const txNewData = getTxNew(tx50Data,orgUnit,period,aoc);
+    const otherData = txNo50Data?.map((d)=>{
         if(toValue(d?.['value']) || toValue(d?.['value']) === 0 ){
-            if( d?.['dataElement'] === "V9CDyyQLlzG" && (period?.includes('03') ||  period?.includes('06') || period?.includes('09') || period?.includes('12'))){
+            if( d?.['dataElement'] === "V9CDyyQLlzG" ){
+                if((period?.includes('03') ||  period?.includes('06') || period?.includes('09') || period?.includes('12'))){
+                    return undefined;
+                }
+            }
+            return {
+                orgUnit : orgUnit,
+                period :period,
+                attributeOptionCombo: aoc,
+                value: toValue(d?.['value']),
+                dataElement: d?.['dataElement'],
+                categoryOptionCombo: d?.['categoryOptionCombo']
+            }
+
+        }
+        else{
+            return undefined;
+        }
+    }).filter(Boolean).filter(String);
+    return otherData.concat(txNewData);
+}
+export const getTxNew =(data,orgUnit,period,aoc)=>{
+    const tx50dataMale = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Male")));
+
+    const tx50dataFemale = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Female")));
+
+    const tx50dataBefore = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && !((d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Female"))));
+    const maleTx = {
+        orgUnit : orgUnit,
+        period :period,
+        attributeOptionCombo: aoc,
+        value: getTxSum(tx50dataMale,period),
+        dataElement: 'V9CDyyQLlzG',
+        categoryOptionCombo: 'cN7C77eDU4T'
+    }
+    const femaleTx = {
+        orgUnit : orgUnit,
+        period :period,
+        attributeOptionCombo: aoc,
+        value: getTxSum(tx50dataFemale,period),
+        dataElement: 'V9CDyyQLlzG',
+        categoryOptionCombo: 'TkNy22uDXzK'
+    }
+
+
+    const txBefore = tx50dataBefore?.map((d)=>{
+        if(toValue(d?.['value']) || toValue(d?.['value']) === 0 ){
+            if((period?.includes('03') ||  period?.includes('06') || period?.includes('09') || period?.includes('12'))){
                 return undefined;
             }
             return {
@@ -182,7 +232,28 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
             return undefined;
         }
     }).filter(Boolean).filter(String);
+    return [maleTx].concat([femaleTx]).concat(txBefore);
 }
+
+export const getTxSum =(data,period)=>{
+    let sum = 0;
+    data?.forEach((d)=>{
+        if(toValue(d?.['value']) || toValue(d?.['value']) === 0 ){
+            if((period?.includes('03') ||  period?.includes('06') || period?.includes('09') || period?.includes('12'))){
+                sum += 0;
+            }
+            else{
+                sum += toValue(d?.['value']);
+            }
+
+        }
+        else{
+            sum50MalePlus += 0;
+        }
+    });
+    return sum;
+}
+
 export const uploadMapping = (file, type)=>{
     const wb = read(file);
     const ws = wb.Sheets[wb.SheetNames[0]];

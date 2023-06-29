@@ -90,6 +90,7 @@ export const ManageMer = () => {
     const [isLegacy, setIsLegacy]= useState(false);
     const [confirmed, setConfirmed] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [started, setStarted] = useState(false);
     const [fileName, setFileName ] = React.useState(undefined);
     const [selected, setSelected ] = React.useState([]);
     const [mapping, setMapping ] = React.useState([]);
@@ -139,11 +140,13 @@ export const ManageMer = () => {
     }
     const validateData=async()=>{
         // Process data
+        setStarted(true);
         return workerFile.createDhis2Import(file,mapping).then((fileResult)=>{
             setHtml(fileResult?.table); // update state
             setRows(fileResult?.data);
             setIsValidating(true);
             setConfirmed(false);
+            setStarted(false);
         });
     }
     const confirmData =()=>{
@@ -225,7 +228,7 @@ export const ManageMer = () => {
                                     message = { message }
                                 />
                             ):(
-                                submitted?(<CircularLoader />):null
+                                (submitted || started)?(<CircularLoader />):null
                             )
                         }
                         <Divider/>  
@@ -303,6 +306,7 @@ export const ManageMer = () => {
                                     onClick={ validateData }
                                     type="button"
                                     value="default"
+                                    disabled ={  started }
                                 >
                                     Review
                                 </Button>
