@@ -166,7 +166,8 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
     const txNo50Data = filteredData?.filter((d)=>d?.['dataElement'] !== "V9CDyyQLlzG" );
     const tx50Data = filteredData?.filter((d)=>d?.['dataElement'] === "V9CDyyQLlzG" );
     const txNewData = getTxNew(tx50Data,orgUnit,period,aoc);
-    const otherData = txNo50Data?.map((d)=>{
+    const otherData = txNo50Data.concat(txNewData);
+    return otherData?.map((d)=>{
         if(toValue(d?.['value']) || toValue(d?.['value']) === 0 ){
             if( d?.['dataElement'] === "V9CDyyQLlzG" ){
                 if((period?.includes('03') ||  period?.includes('06') || period?.includes('09') || period?.includes('12'))){
@@ -187,14 +188,14 @@ export const createDhis2Payload=(data,mapping,period,orgUnit,aoc,isLegacy=false)
             return undefined;
         }
     }).filter(Boolean).filter(String);
-    return otherData.concat(txNewData);
 }
 export const getTxNew =(data,orgUnit,period,aoc)=>{
-    const tx50dataMale = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Male")));
+    const tx50dataMale = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50+ Male")));
 
-    const tx50dataFemale = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Female")));
+    const tx50dataFemale = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50+ Female")));
 
-    const tx50dataBefore = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && !((d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Female"))));
+    const tx50dataBefore = data?.filter((d)=>((d?.['dataElement'] === "V9CDyyQLlzG" ) && !((d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50-54 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 55-59 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 60-64 Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 65+ Female") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50+ Male") || (d?.['SMARTCAREIndicatorLabel']?.trim()==="By Age/Sex: 50+ Female"))));
+    
     const maleTx = {
         orgUnit : orgUnit,
         period :period,

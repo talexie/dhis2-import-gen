@@ -58,7 +58,7 @@ const periodTypes = getPeriodTypes(['Monthly']);
 
 export const postData = async(bodyData)=>{
     const fetchBody = JSON.stringify(bodyData);
-    const response = await fetch('../../dataValueSets', {
+    const response = await fetch('../../dataValueSets?preheatCache=true&importStrategy=CREATE_AND_UPDATE&async=false', {
       method: "POST",
       body: fetchBody,
       headers: {
@@ -66,7 +66,6 @@ export const postData = async(bodyData)=>{
       }
     });
     let res = await response.json();
-    console.log(res);
     return res;
   }
 
@@ -99,7 +98,8 @@ export const ManageMer = () => {
     const [selectedPeriod,setSelectedPeriod] = useState("");
     const { organisationUnitId, handleOrganisationUnitChange} = useOrgUnit();
     const { data: smartcare, isLoading } = useQuery({
-        queryKey: ['dataStore/terminology/smartcare']
+        queryKey: ['dataStore/terminology/smartcare'],
+        enabled: !isValidating
     });
     const { data: legacyGroup, isLoading:isLegacyGroupLoading } = useQuery({
         queryKey: [`organisationUnits/${selected}&fields:organisationUnitGroups[id,name,code]`],
