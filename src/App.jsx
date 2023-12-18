@@ -5,6 +5,7 @@ import {
   } from './analytics';
   import {
     DownloadART,
+    ImportAggregateData,
     ManageART,
     ManageIndicatorMapping,
     ManageMappings,
@@ -86,6 +87,11 @@ export const routes = [
           label: "Upload ART Register",
           path: "artupload",
           element: <ManageART/>
+        },
+        {
+          label: "HMIS Data Import",
+          path: "dataimport",
+          element: <ImportAggregateData/>
         }
       ]
     }

@@ -11,10 +11,7 @@ export default defineConfig({
   base: "./",
   plugins: [
     react({
-      jsxImportSource:'@emotion/react',
-      babel:{
-        plugins:['@emotion/babel-plugin']
-      }
+      jsxImportSource:'@emotion/react'
     }),
     zipPack({
       inDir: 'build',

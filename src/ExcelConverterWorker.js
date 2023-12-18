@@ -1,6 +1,6 @@
 import { read, utils, write } from 'xlsx';
 import { get } from 'lodash';
-import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeRenameLabels, nativeReplaceNull, toValue } from './utils';
+import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeRenameLabels, nativeAddLabels, toValue } from './utils';
 import { format } from 'date-fns';
 
 export const createDhis2Import =(file)=>{
@@ -354,4 +354,73 @@ export const getUploadFile = (file)=>{
     const worksheet = utils.json_to_sheet(dropData, { skipHeader: true });
     wb.Sheets[wb.SheetNames[0]] = worksheet;
     return write(wb, {bookType: 'xlsx', type: 'array'});
+}
+/**
+ * Get file with uploaded data
+ * @param {*} file 
+ * @returns 
+ */
+export const getUploadedDataFile = (file,type,attribute)=>{
+    const wb = read(file);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const dataWs = getMergeValue(ws);
+    const data = utils.sheet_to_json(dataWs);
+    const dropData = nativeDropLabels(data,['Numerator', 'Denominator', 'Divisor', 'Multiplier','Factor']);
+    const renamedData = nativeRenameLabels(dropData,[
+        { old: 'Data',new:'dataElement'},
+        { old: 'Period',new:'period'},
+        { old: 'Organisation unit',new:'orgUnit'},
+        { old: 'Category option combo',new:'categoryOptionCombo'},
+        { old: 'Value',new:'value'},
+    ]);
+    const stringifiedData = renamedData?.map((v)=>{
+        if(Object.hasOwn(v,'period')){
+            v.period = v?.period.toString();
+        }
+        if(type === 'INDICATOR_DATA' && Object.hasOwn(v,'categoryOptionCombo') && v.categoryOptionCombo ==='lmbxvugTvKr'){
+            v.categoryOptionCombo = 'HllvX50cXC0';
+        }
+        if(type === 'REPORTING_RATE' && !Object.hasOwn(v,'categoryOptionCombo')){
+            if(v.dataElement?.includes('.ACTUAL_REPORTS')){
+                v.dataElement = 'BAIG9bSqLic';
+                v.categoryOptionCombo = 'tzlJJCzGgV0';
+            }
+            if(v.dataElement?.includes('.ACTUAL_REPORTS_ON_TIME')){
+                v.dataElement = 'BAIG9bSqLic';
+                v.categoryOptionCombo = 'c6ujrqLHkXx';
+            }
+            if(v.dataElement?.includes('.EXPECTED_REPORTS')){
+                v.dataElement = 'BAIG9bSqLic';
+                v.categoryOptionCombo = 'lhHpOfGGIVX';
+            }
+            if(v.dataElement?.includes('.REPORTING_RATE_ON_TIME')){
+                v.dataElement = 'BAIG9bSqLic';
+                v.categoryOptionCombo = 'n3BZzH0LlDI';
+            }
+            if(v.dataElement?.includes('.REPORTING_RATE')){
+                v.dataElement = 'BAIG9bSqLic';
+                v.categoryOptionCombo = 'vv50rsF0BLM';
+            }
+        }
+        return v;
+    });
+    let attributedData = stringifiedData;
+    if(attribute){
+        attributedData = nativeAddLabels(stringifiedData,'attributeOptionCombo',attribute);
+    }
+    return attributedData;
+}
+/**
+ * Review data
+ * @param {*} data 
+ * @returns 
+ */
+export const reviewDhis2Import =(data)=>{
+    /* create workbook and display HTML */
+    const wb = utils.book_new();
+    const ws = utils.json_to_sheet(data);
+    utils.book_append_sheet(wb, ws, "HMIS Data"); 
+    const worksheet = wb.Sheets[wb.SheetNames[0]];   
+    const tblData = utils.sheet_to_html(worksheet);
+    return tblData;
 }

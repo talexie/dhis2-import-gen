@@ -4,3 +4,4 @@ export * from './ManageMer';
 export * from './ManageMappings';
 export * from './ManageART';
 export * from './DownloadART';
+export * from './ImportAggregateData';
