@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css } from '@emotion/react';
-import { FileInputField, Divider, Button, NoticeBox, FileListItem, CircularLoader } from '@dhis2/ui';
+import { FileInputField, Divider, Button, NoticeBox, FileListItem, CircularLoader, FieldGroup, Radio } from '@dhis2/ui';
 import { Container, Stack  } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { ImportFeedBack } from '../ui';
@@ -8,6 +8,7 @@ import { createWorkerFactory, useWorker } from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import DataGrid from 'react-data-grid';
 import { useQueryClient, useMutation, QueryObserver, useQuery } from 'react-query';
+import { isEmpty } from 'lodash';
 
 const columns = [
   { key: 'dataElement', name: 'Data Element', resizable: true, sortable: true},
@@ -120,8 +121,7 @@ export const ImportAggregateData = () => {
     })
 
     const unsubscribe = observer.subscribe(result => {
-        console.log('result:',result?.data);
-        setTasks(result?.data??[]);
+        setTasks(result?.data?.reverse()??[]);
         //unsubscribe()
     })
     
@@ -170,9 +170,6 @@ export const ImportAggregateData = () => {
         }
     },[tasks])
     console.log('tasks: ', tasks);
-    console.log('summaries: ', summaries);
-    console.log('summary: ', summaryCompleted);
-
     return (
         <Container css={ classes.root }>
             {
@@ -192,7 +189,25 @@ export const ImportAggregateData = () => {
                                     message = { summaries}
                                 />
                             ):(
-                                (completed && validated)?(<CircularLoader />):null
+                                (completed && validated)?(
+                                    <Stack spacing= {2} alignItems={ 'flex-start'}>
+                                        <CircularLoader />
+                                        {
+                                            !isEmpty(tasks) &&
+                                                tasks?.map((t,i)=>(
+                                                <>
+                                                    <Divider/>
+                                                    <Stack spacing={1} direction='row'>
+                                                        <div key={`task-${i}-${t.id}-id`}>{t?.id}</div>
+                                                        <div key={`task-${i}-${t.id}-category`}>{t?.category}</div>
+                                                        <div key={`task-${i}-${t.id}-level`}>{t?.level}</div>
+                                                        <div key={`task-${i}-${t.id}-message`}>{t?.message}</div>
+                                                    </Stack>
+                                                </>
+                                            ))
+                                        }
+                                    </Stack>
+                                ):null
                             )
                         }        
                         <Divider/>  
