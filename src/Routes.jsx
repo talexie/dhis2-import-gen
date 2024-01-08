@@ -4,7 +4,7 @@ import { NavTabs } from './ui';
 import { Container } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
-import { getUserGroup, useCurrentUser, UserContext } from './utils';
+import { getUserGroup, hasAccessToRoute, hasUserGroup, useCurrentUser, UserContext } from './utils';
 import { CircularLoader, Divider } from '@dhis2/ui';
 
 const root =css({
@@ -42,7 +42,9 @@ export const AppRoutes = () => {
       <UserContext.Provider value={ {
         user: data,
         isAdmin: isAdmin,
-        canResubmit: getUserGroup(data?.userGroups,'ZM_SMARTCARE_ADMIN' )
+        canResubmit: getUserGroup(data?.userGroups,'ZM_SMARTCARE_ADMIN' ),
+        hasAccess: hasAccessToRoute(data?.userGroups,routes[0]?.children),
+        restricted: hasUserGroup(data?.userGroups,'RESTRICTED_APP_ACCESS' )
       }}>
         <div css ={ root }>
           <NavTabs

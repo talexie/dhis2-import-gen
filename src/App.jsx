@@ -23,6 +23,7 @@ import {
   } from 'react-query';
 import { theme } from '@dhis2/ui'
 import { PageError } from './PageError';
+import { Home } from './ui';
 
   
 const defaultQueryFn = async ({ queryKey }) => {
@@ -46,7 +47,8 @@ export const routes = [
       children: [
         {
           path: "/",
-          element: <ManageMer/>
+          element: <Home/>,
+          label: "Home"
         },
         {
           label: "Data Export",
@@ -91,7 +93,8 @@ export const routes = [
         {
           label: "HMIS Data Import",
           path: "dataimport",
-          element: <ImportAggregateData/>
+          element: <ImportAggregateData/>,
+          userGroup: "RESTRICTED_APP_ACCESS" 
         }
       ]
     }

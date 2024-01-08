@@ -380,7 +380,7 @@ export const getUploadedDataFile = (file,type,attribute)=>{
         if(type === 'INDICATOR_DATA' && Object.hasOwn(v,'categoryOptionCombo') && v.categoryOptionCombo ==='lmbxvugTvKr'){
             v.categoryOptionCombo = 'HllvX50cXC0';
         }
-        if(type === 'REPORTING_RATE' && !Object.hasOwn(v,'categoryOptionCombo')){
+        if(type === 'REPORTING_RATE'){
             if(v.dataElement?.includes('.ACTUAL_REPORTS')){
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'tzlJJCzGgV0';
@@ -389,7 +389,7 @@ export const getUploadedDataFile = (file,type,attribute)=>{
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'c6ujrqLHkXx';
             }
-            if(v.dataElement?.includes('.EXPECTED_REPORTS')){
+            if(v.dataElement?.includes('EXPECTED_REPORTS')){
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'lhHpOfGGIVX';
             }

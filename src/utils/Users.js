@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import isEmpty from 'lodash/isEmpty';
 
 /**
  * Get User Hook
@@ -32,4 +33,19 @@ export const hasUserGroup = (groups,userGroup)=>{
 export const getUserGroup = (groups, userGroup)=>{
     const testGroups = groups?.map((g)=>g?.code?.toUpperCase());
     return testGroups?.indexOf(userGroup?.toUpperCase()) > -1;
+}
+/**
+ * Check if user has access to routes and
+ * @param {*} groups 
+ * @param {*} userGroup 
+ * @returns 
+ */
+export const hasAccessToRoute = (groups,routes)=>{
+    if(!isEmpty(groups) && !isEmpty(routes)){
+        return false;
+    }
+    else{
+        return groups?.some((g)=>routes?.some((r)=>(r?.userGroup?.toUpperCase() === g?.code?.toUpperCase()) || (g?.name?.toUpperCase() === r?.userGroup?.toUpperCase()))
+       );
+    }
 }

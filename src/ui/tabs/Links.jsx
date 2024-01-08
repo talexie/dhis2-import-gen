@@ -5,6 +5,7 @@ import {
     useResolvedPath 
 } from "react-router-dom";
 import { css } from '@emotion/react';
+import { useUser } from '../../utils';
 
 const activeStyle = (match)=>css({
     padding: '16px',
@@ -28,12 +29,15 @@ export const CustomLink = ({ children, label, to, ...props }) => {
 }
 
 export const NavTabs =({ options })=>{
+    const userRestricted = useUser();
+    const restrictedTabs = options?.filter((o)=>o?.userGroup === 'RESTRICTED_APP_ACCESS');
+    const tabs = userRestricted?.restricted && !userRestricted?.isAdmin?restrictedTabs:options;
     return(
         <div>
             <nav>
                 <ul>
                 { 
-                    options.map( (option,i) =>{
+                    tabs?.map( (option,i) =>{
                         return(
                             <CustomLink
                                 key = { `route-${option?.path}-${option.label}-${i}` }

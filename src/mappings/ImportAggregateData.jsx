@@ -190,26 +190,33 @@ export const ImportAggregateData = () => {
                                 />
                             ):(
                                 (completed && validated)?(
-                                    <Stack spacing= {2} alignItems={ 'flex-start'}>
+                                    
                                         <CircularLoader />
-                                        {
-                                            !isEmpty(tasks) &&
-                                                tasks?.map((t,i)=>(
-                                                <>
-                                                    <Divider/>
-                                                    <Stack spacing={1} direction='row'>
-                                                        <div key={`task-${i}-${t.id}-id`}>{t?.id}</div>
-                                                        <div key={`task-${i}-${t.id}-category`}>{t?.category}</div>
-                                                        <div key={`task-${i}-${t.id}-level`}>{t?.level}</div>
-                                                        <div key={`task-${i}-${t.id}-message`}>{t?.message}</div>
-                                                    </Stack>
-                                                </>
-                                            ))
-                                        }
-                                    </Stack>
+                                        
                                 ):null
                             )
-                        }        
+                        }
+                        {
+                            
+                            !isEmpty(tasks) && (
+                                <Stack spacing= {2} alignItems={ 'flex-start'}>
+                                    {
+                                        tasks?.map((t,i)=>(
+                                        <>
+                                            <Divider/>
+                                            <Stack spacing={1} direction='row'>
+                                                <div key={`task-${i}-${t.id}-id`}>{t?.id}</div>
+                                                <div key={`task-${i}-${t.id}-category`}>{t?.category}</div>
+                                                <div key={`task-${i}-${t.id}-level`}>{t?.level}</div>
+                                                <div key={`task-${i}-${t.id}-message`}>{t?.message}</div>
+                                            </Stack>
+                                        </>
+                                        ))
+                                    }
+                                </Stack>
+                            )
+                        }                                 
+                               
                         <Divider/>  
                         <FieldGroup>
                             {
