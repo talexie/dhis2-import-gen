@@ -3,12 +3,10 @@ import { css } from '@emotion/react';
 import { FileInputField, Button, Divider, NoticeBox, FileListItem, CircularLoader } from '@dhis2/ui';
 import { Container, Stack } from '@mui/material';
 import { useState } from 'react';
-import {  ImportFeedBack, OrgUnitControl, PeriodField, useOrgUnit } from '../ui';
+import {  ImportFeedBack, OrgUnitControl, useOrgUnit } from '../ui';
 import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import { useQueryClient, useMutation } from 'react-query';
-import { generatePeriods, getPeriodTypes, useUser } from '../utils';
-import { sortBy } from 'lodash';
 import { format } from 'date-fns';
 
 const createWorker = createWorkerFactory(() => import('../ExcelConverterWorker'));

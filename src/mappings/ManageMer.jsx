@@ -10,7 +10,13 @@ import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import DataGrid from 'react-data-grid';
 import { useQuery, useQueryClient, useMutation } from 'react-query';
-import style from './styles.css';
+
+const style = css({
+    
+        color: '#ffffff !important',
+        borderColor: '#0a6619 !important',
+        background: 'linear-gradient(rgb(39 143 76) 0%,rgb(25 126 58) 100%) rgb(27 150 59)!important'
+})
 
 const columns = [
   { key: 'A', name: 'A', resizable: true, sortable: true, frozen: true },
@@ -333,7 +339,7 @@ export const ManageMer = () => {
                                                 alignItems="flex-start"
                                                 spacing={8}
                                             >
-                                                <Button onClick={ onClose } primary className={style.primary}>
+                                                <Button onClick={ onClose } primary css={style}>
                                                     Yes
                                                 </Button>
                                                 <Button onClick={ onCancel } destructive>
