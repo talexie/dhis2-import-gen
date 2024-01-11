@@ -96,12 +96,7 @@ export const ImportAggregateData = () => {
         onSuccess: data => {
             setMessage(data?.response);
             setTaskId(data?.response?.id);
-            //if(data?.status ==="OK" && data.response.status ==="SUCCESS"){
-                setCompleted(true);
-            /*}
-            else{
-                setCompleted(false);
-            }*/     
+            setCompleted(true);    
         },
         onError: () => {
           alert("There was an error");
@@ -162,13 +157,13 @@ export const ImportAggregateData = () => {
         setType(selected?.value);  
     }
     useEffect(()=>{
-        if(hasTaskCompleted(tasks)){
+        if(hasTaskCompleted(tasks) && !summaryCompleted){
             setTaskCompleted(true);
         }
         else{
             setTaskCompleted(false);
         }
-    },[tasks])
+    },[tasks,summaryCompleted])
     console.log('tasks: ', tasks);
     return (
         <Container css={ classes.root }>
