@@ -101,24 +101,13 @@ export const ImportAggregateData = () => {
         onError: () => {
           alert("There was an error");
           setCompleted(false);
-        },
-        onSettled: () => {
-          queryClient.invalidateQueries('create');
         }
     });
     const { data:summaries, isLoading: summaryCompleted } = useQuery({ 
         queryKey: [`system/taskSummaries/${message?.jobType}/${taskId}`],
         enabled: !!taskId && !!message?.jobType && taskCompleted
     })
-    const observer = new QueryObserver(queryClient, { 
-        queryKey: [`system/tasks/${message?.jobType}/${taskId}`],
-        enabled: !!taskId && !!message?.jobType && !taskCompleted
-    })
 
-    const unsubscribe = observer.subscribe(result => {
-        setTasks(result?.data?.reverse()??[]);
-        //unsubscribe()
-    })
     
     const reviewData=async()=>{
         // Process data
@@ -156,6 +145,30 @@ export const ImportAggregateData = () => {
     const onSelectMapping=(selected,_event)=>{
         setType(selected?.value);  
     }
+
+    useEffect(()=>{
+        const observer = new QueryObserver(queryClient, { 
+            queryKey: [`system/tasks/${message?.jobType}/${taskId}`],
+            enabled: !!taskId && !!message?.jobType && !taskCompleted,
+            refetchInterval: ()=>{
+                if(taskCompleted) {
+                    return false;
+                }
+                else{
+                    return 10000;
+                }
+            }
+        })
+    
+        const unsubscribe = observer.subscribe(result => {
+            setTasks(result?.data?.reverse()??[]);
+            //unsubscribe()
+        })
+        return ()=>{
+            unsubscribe();
+        }
+    },[taskId,message?.jobType,queryClient,taskCompleted]);
+
     useEffect(()=>{
         if(hasTaskCompleted(tasks) && !summaryCompleted){
             setTaskCompleted(true);
@@ -163,8 +176,7 @@ export const ImportAggregateData = () => {
         else{
             setTaskCompleted(false);
         }
-    },[tasks,summaryCompleted])
-    console.log('tasks: ', tasks);
+    },[summaryCompleted,tasks])
     return (
         <Container css={ classes.root }>
             {
