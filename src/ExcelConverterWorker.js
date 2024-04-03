@@ -381,7 +381,7 @@ export const getUploadedDataFile = (file,type,attribute)=>{
             v.categoryOptionCombo = 'HllvX50cXC0';
         }
         if(type === 'REPORTING_RATE'){
-            if(v.dataElement?.includes('.ACTUAL_REPORTS')){
+            if(v.dataElement?.includes('.ACTUAL_REPORTS') && !v.dataElement?.includes('.ACTUAL_REPORTS_ON_TIME')){
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'tzlJJCzGgV0';
             }
@@ -389,7 +389,7 @@ export const getUploadedDataFile = (file,type,attribute)=>{
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'c6ujrqLHkXx';
             }
-            if(v.dataElement?.includes('EXPECTED_REPORTS')){
+            if(v.dataElement?.includes('.EXPECTED_REPORTS')){
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'lhHpOfGGIVX';
             }
@@ -397,7 +397,7 @@ export const getUploadedDataFile = (file,type,attribute)=>{
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'n3BZzH0LlDI';
             }
-            if(v.dataElement?.includes('.REPORTING_RATE')){
+            if(v.dataElement?.includes('.REPORTING_RATE') && !v.dataElement?.includes('.REPORTING_RATE_ON_TIME')){
                 v.dataElement = 'BAIG9bSqLic';
                 v.categoryOptionCombo = 'vv50rsF0BLM';
             }
