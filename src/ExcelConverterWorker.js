@@ -1,5 +1,6 @@
 import { read, utils, write } from 'xlsx';
-import { get } from 'lodash';
+import get from 'lodash/get';
+import uniq from 'lodash/uniq';
 import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeRenameLabels, nativeAddLabels, toValue } from './utils';
 import { format } from 'date-fns';
 
@@ -356,59 +357,158 @@ export const getUploadFile = (file)=>{
     return write(wb, {bookType: 'xlsx', type: 'array'});
 }
 /**
+ * Find Element by property 
+ * @param {*} data 
+ * @param {*} property defaults to 'code' 
+ * @returns 
+ */
+export const findElementByProperty =(data,value,property='code')=>{
+    return data?.find((ou)=>get(ou,property) === value);
+}
+
+/**
+ * Get Element by property 
+ * @param {*} data 
+ * @param {*} property defaults to 'code' 
+ * @returns 
+ */
+export const getElementByProperty =(data,property='code')=>{
+    return uniq(data?.map((ou)=>get(ou,property))?.filter(Boolean)?.filter(String));
+}
+
+
+
+/**
+ * Create Tracker Payload for importing to the system
+ * @param {*} data 
+ * @returns 
+ */
+export const createTrackerDataFile=(data)=>{
+    const renamedData = nativeRenameLabels(data,[
+        {old:"Event_ID",new:"NbY39IsysW8"},
+        {old:"Findname",new:"zpbuh92IZv5"},
+        {old:"Participant_ID",new:"PnTyfCzi21U"},
+        {old:"Participant_enroll_type",new:"ZbV6b9nyjEA"},
+        {old:"_ComputedKey",new:"zPurCMBL0Nu"},
+        {old:"Event_USAID_IR",new:"RhvGRpZugO3"},
+        {old:"Event_USAID_SubIR",new:"OjJycXuMuZk"},
+        {old:"Event_USAID_ACT",new:"GvmIaOBA03d"},
+        {old:"Event_MOU_SO",new:"lUy2eqH1sEJ"},
+        {old:"Event_MOU_SubSO",new:"KzMfUxbeFzD"},
+        {old:"Event_MOU_ACT",new:"Cy318oojbdQ"},
+        {old:"Event_MOU_and_Ncode",new:"fcu3uzzjyKs"},
+        {old:"Event_location",new:"PRGOGappybO"},
+        {old:"Event_Province",new:"MecFf6Wq7LR"},
+        {old:"Event_District",new:"n0ShOa0FxbX"},
+        {old:"Event_Other_Location",new:"iagm7CqAJJh"},
+        {old:"Event_name",new:"rl6qyAcUs38"},
+        {old:"Event_Domain",new:"Vage2qvHXd0"},
+        {old:"Event_Activity_topic",new:"TFC0Rw839uT"},
+        {old:"Event_type",new:"vzTfKRtECRq"},
+        {old:"Event_Internal_Project",new:"VEP9Sw6YF8n"},
+        {old:"Event_USAID_report_FOR_TRAINING_INDICATOR_ONLY",new:"LQtnBdLYXpt"},
+        {old:"Event_MOU_report",new:"c0AabYVBn3m"},
+        {old:"Event_Organizer_by",new:"U5ObMxm5NK8"},
+        {old:"Event_level",new:"UdE4lSfvq3g"},
+        {old:"Event_Topic_areas",new:"FlgUIrpzdAk"},
+        {old:"Event_Topic_areas_by_SO",new:"llmn6FOCToG"},
+        {old:"Event_Start_date",new:"gc5xwL8Iov7"},
+        {old:"Event_End_date",new:"XRg8WWy75xH"},
+        {old:"Total_number_of_participants",new:"ItA7s4eRtgD"},
+        {old:"Total_number_of_female_participants",new:"n3E7I8XIsGW"},
+        {old:"Was_the_event_engage_a_large_number_of_participants",new:"YOIw7kXDTCB"},
+        {old:"Participant_Name",new:"SQ1xgm6PPJA"},
+        {old:"Participant_Surname",new:"liQTjxYq72E"},
+        {old:"Participant_Gender",new:"fe1F4nvTxPX"},
+        {old:"Participant_work_Province",new:"jKpfUlsauCD"},
+        {old:"Participant_work_District",new:"lXstk077AsZ"},
+        {old:"Participant_work_village",new:"EpxTg68OtYJ"},
+        {old:"Participant_Official_Position",new:"TwqvBE6IVxN"},
+        {old:"Participant_Cleaned_Positions",new:"uE16E2Rnx16"},
+        {old:"Participant_Responsible_unit",new:"B4mCRObggzm"},
+        {old:"Participant_Organization_Name",new:"JvQcAg9kiUH"},
+        {old:"Participant_Organization_type",new:"EIwXld7Sc9o"},
+        {old:"Participant_Organization_Level",new:"M2mQBNAhYwW"},
+        {old:"Participant_Contact_Number",new:"pOKzZubB27Y"},
+        {old:"Participant_WhatsApp_number",new:"InTacvgZhpW"},
+        {old:"Event_USAID_Type",new:"Q2XqijFJnIr"},
+        {old:"Event_USAID_Domain",new:"Kfc4bffUKU2"},
+        {old:"Event_USAID_Indicator",new:"cwp2WfIfxKj"},
+        {old:"Event_MOU_Type",new:"xpUsddrA1TP"}
+        
+    ]);
+    return renamedData;
+}
+
+/**
  * Get file with uploaded data
  * @param {*} file 
  * @returns 
  */
-export const getUploadedDataFile = (file,type,attribute)=>{
+export const getUploadedDataFile = (file)=>{
     const wb = read(file);
     const ws = wb.Sheets[wb.SheetNames[0]];
     const dataWs = getMergeValue(ws);
     const data = utils.sheet_to_json(dataWs);
-    const dropData = nativeDropLabels(data,['Numerator', 'Denominator', 'Divisor', 'Multiplier','Factor']);
-    const renamedData = nativeRenameLabels(dropData,[
-        { old: 'Data',new:'dataElement'},
-        { old: 'Period',new:'period'},
-        { old: 'Organisation unit',new:'orgUnit'},
-        { old: 'Category option combo',new:'categoryOptionCombo'},
-        { old: 'Value',new:'value'},
-    ]);
-    const stringifiedData = renamedData?.map((v)=>{
-        if(Object.hasOwn(v,'period')){
-            v.period = v?.period.toString();
-        }
-        if(type === 'INDICATOR_DATA' && Object.hasOwn(v,'categoryOptionCombo') && v.categoryOptionCombo ==='lmbxvugTvKr'){
-            v.categoryOptionCombo = 'HllvX50cXC0';
-        }
-        if(type === 'REPORTING_RATE'){
-            if(v.dataElement?.includes('.ACTUAL_REPORTS') && !v.dataElement?.includes('.ACTUAL_REPORTS_ON_TIME')){
-                v.dataElement = 'BAIG9bSqLic';
-                v.categoryOptionCombo = 'tzlJJCzGgV0';
-            }
-            if(v.dataElement?.includes('.ACTUAL_REPORTS_ON_TIME')){
-                v.dataElement = 'BAIG9bSqLic';
-                v.categoryOptionCombo = 'c6ujrqLHkXx';
-            }
-            if(v.dataElement?.includes('.EXPECTED_REPORTS')){
-                v.dataElement = 'BAIG9bSqLic';
-                v.categoryOptionCombo = 'lhHpOfGGIVX';
-            }
-            if(v.dataElement?.includes('.REPORTING_RATE_ON_TIME')){
-                v.dataElement = 'BAIG9bSqLic';
-                v.categoryOptionCombo = 'n3BZzH0LlDI';
-            }
-            if(v.dataElement?.includes('.REPORTING_RATE') && !v.dataElement?.includes('.REPORTING_RATE_ON_TIME')){
-                v.dataElement = 'BAIG9bSqLic';
-                v.categoryOptionCombo = 'vv50rsF0BLM';
-            }
-        }
-        return v;
-    });
-    let attributedData = stringifiedData;
-    if(attribute){
-        attributedData = nativeAddLabels(stringifiedData,'attributeOptionCombo',attribute);
+    return data;
+}
+/**
+ * Get upload formatted Payload
+ * @param {*} data 
+ * @param {*} type 
+ * @param {*} attribute 
+ * @returns 
+ */
+export const getUploadedData = (data,type,attribute)=>{
+    if(type ==='TRACKER_DATA'){
+        return createTrackerDataFile(data);
     }
-    return attributedData;
+    else{
+        const dropData = nativeDropLabels(data,['Numerator', 'Denominator', 'Divisor', 'Multiplier','Factor']);
+        const renamedData = nativeRenameLabels(dropData,[
+            { old: 'Data',new:'dataElement'},
+            { old: 'Period',new:'period'},
+            { old: 'Organisation unit',new:'orgUnit'},
+            { old: 'Category option combo',new:'categoryOptionCombo'},
+            { old: 'Value',new:'value'},
+        ]);
+        const stringifiedData = renamedData?.map((v)=>{
+            if(Object.hasOwn(v,'period')){
+                v.period = v?.period.toString();
+            }
+            if(type === 'INDICATOR_DATA' && Object.hasOwn(v,'categoryOptionCombo') && v.categoryOptionCombo ==='lmbxvugTvKr'){
+                v.categoryOptionCombo = 'HllvX50cXC0';
+            }
+            if(type === 'REPORTING_RATE'){
+                if(v.dataElement?.includes('.ACTUAL_REPORTS') && !v.dataElement?.includes('.ACTUAL_REPORTS_ON_TIME')){
+                    v.dataElement = 'BAIG9bSqLic';
+                    v.categoryOptionCombo = 'tzlJJCzGgV0';
+                }
+                if(v.dataElement?.includes('.ACTUAL_REPORTS_ON_TIME')){
+                    v.dataElement = 'BAIG9bSqLic';
+                    v.categoryOptionCombo = 'c6ujrqLHkXx';
+                }
+                if(v.dataElement?.includes('.EXPECTED_REPORTS')){
+                    v.dataElement = 'BAIG9bSqLic';
+                    v.categoryOptionCombo = 'lhHpOfGGIVX';
+                }
+                if(v.dataElement?.includes('.REPORTING_RATE_ON_TIME')){
+                    v.dataElement = 'BAIG9bSqLic';
+                    v.categoryOptionCombo = 'n3BZzH0LlDI';
+                }
+                if(v.dataElement?.includes('.REPORTING_RATE') && !v.dataElement?.includes('.REPORTING_RATE_ON_TIME')){
+                    v.dataElement = 'BAIG9bSqLic';
+                    v.categoryOptionCombo = 'vv50rsF0BLM';
+                }
+            }
+            return v;
+        });
+        let attributedData = stringifiedData;
+        if(attribute){
+            attributedData = nativeAddLabels(stringifiedData,'attributeOptionCombo',attribute);
+        }
+        return attributedData;
+    }
 }
 /**
  * Review data

@@ -8,7 +8,7 @@ import { createWorkerFactory, useWorker } from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import DataGrid from 'react-data-grid';
 import { useQueryClient, useMutation, QueryObserver, useQuery } from 'react-query';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 const columns = [
   { key: 'dataElement', name: 'Data Element', resizable: true, sortable: true},
@@ -59,11 +59,19 @@ export const reportTypes = [
         name: "HMIS Indicator Data",
         label: "HMIS Indicator Data",
         value: "INDICATOR_DATA"
+    },
+    {
+        name: "Training",
+        label: "Training",
+        value: "TRACKER_DATA"
     }
 ]
 export const postAggregateData = async(bodyData)=>{
-    const fetchBody = JSON.stringify(bodyData);
-    const response = await fetch('../../dataValueSets?preheatCache=true&importStrategy=CREATE_AND_UPDATE&async=true', {
+    const apiPayload = bodyData?.data;
+    const dataType = bodyData?.type;
+    const apiEndpoint = (dataType ==='TRACKER_DATA')?'tracker':'dataValueSets';
+    const fetchBody = JSON.stringify(apiPayload);
+    const response = await fetch(`../../${apiEndpoint}?preheatCache=true&importStrategy=CREATE_AND_UPDATE&async=true`, {
       method: "POST",
       body: fetchBody,
       headers: {
@@ -72,7 +80,8 @@ export const postAggregateData = async(bodyData)=>{
     });
     let res = await response.json();
     return res;
-  }
+}
+
 export const hasTaskCompleted = (task) => {
     return task?.some((t)=>t?.completed);
 }
@@ -91,7 +100,10 @@ export const ImportAggregateData = () => {
     const [message,setMessage] = useState("");
     const [tasks,setTasks] = useState([]);
     const [taskId,setTaskId] = useState(undefined);
-    const [type, setType ] = React.useState(undefined);
+    const [type, setType ] = useState(undefined);
+    const [orgUnits,setOrgUnits] = useState([]);
+    const [events,setEvents] = useState([]);
+    const [crossChecked, setCrossChecked] = useState(false);
     const { mutate, isLoading:posting } = useMutation(postAggregateData, {
         onSuccess: data => {
             setMessage(data?.response);
@@ -106,7 +118,15 @@ export const ImportAggregateData = () => {
     const { data:summaries, isLoading: summaryCompleted } = useQuery({ 
         queryKey: [`system/taskSummaries/${message?.jobType}/${taskId}`],
         enabled: !!taskId && !!message?.jobType && taskCompleted
-    })
+    });
+    const { data:fetchOrgUnits, isLoading: fetchOrgUnitsLoading } = useQuery({ 
+        queryKey: [`organisationUnits?filter=shortName:in:[${ orgUnits?.join(',')}]`],
+        enabled: !isEmpty(orgUnits) && validated
+    });
+    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQuery({ 
+        queryKey: [`tracker/trackedEntities.json?program=s8WUHekh0aU&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ events?.join(';')}&fields=*,!relationships,!programOwners,!createdBy,!updatedBy`],
+        enabled: !isEmpty(events) && validated
+    });
 
     
     const reviewData=async()=>{
@@ -119,9 +139,12 @@ export const ImportAggregateData = () => {
         setValidated(true);
     }
     const submitData = async ()=>{
-        if(validated){
+        if(validated && crossChecked){
             const dataValues = {
-                dataValues: rows
+                type: type,
+                data:{
+                    dataValues: rows
+                }
             };
             mutate(dataValues); 
         } 
@@ -135,7 +158,13 @@ export const ImportAggregateData = () => {
         const fileReader = new FileReader();
         fileReader.readAsArrayBuffer(files[0]);
         fileReader.onload = async(e) => {
-            const sData = await workerFile.getUploadedDataFile(e?.target?.result,type,'bdV6upF84Hd');
+            const fileData = await workerFile.getUploadedDataFile(e?.target?.result);
+            const validateOrgUnits = await workerFile.getElementByProperty(fileData,'Event_District');
+            const validateParticipants = await workerFile.getElementByProperty(fileData,'Participant_ID');
+            console.log("Participants:",validateParticipants);
+            setOrgUnits(validateOrgUnits);
+            setEvents(validateParticipants);
+            const sData = await workerFile.getUploadedDataFile(fileData,type,'bdV6upF84Hd');
             setRows(sData);
         }; 
     }
@@ -176,7 +205,15 @@ export const ImportAggregateData = () => {
         else{
             setTaskCompleted(false);
         }
-    },[summaryCompleted,tasks])
+    },[summaryCompleted,tasks]);
+    useEffect(()=>{
+        if(!fetchEventsLoading && !fetchOrgUnitsLoading){
+            setCrossChecked(true);
+        }
+        else{
+            setCrossChecked(false);  
+        }
+    },[fetchEventsLoading, fetchOrgUnitsLoading]);
     return (
         <Container css={ classes.root }>
             {

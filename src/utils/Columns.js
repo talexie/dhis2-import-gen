@@ -338,11 +338,3 @@ export const join =(lookupTable, mainTable, lookupKey, mainKey, select)=> {
     }
     return output;
 };
-/*
-const equijoin = (xs, ys, primary, foreign, sel) => {
-    const ix = xs.reduce((ix, row) => ix.set(row[primary], row), new Map);
-    return ys.map(row => sel(ix.get(row[foreign]), row));
-};
-onst result = equijoin(userProfiles, questions, "id", "createdBy",
-    ({name}, {id, text}) => ({id, text, name}));
-*/
