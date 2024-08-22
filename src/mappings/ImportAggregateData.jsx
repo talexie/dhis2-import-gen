@@ -7,8 +7,11 @@ import { ImportFeedBack } from '../ui';
 import { createWorkerFactory, useWorker } from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import DataGrid from 'react-data-grid';
-import { useQueryClient, useMutation, QueryObserver, useQuery } from 'react-query';
+import { useQueryClient, useMutation, QueryObserver, useQuery, useQueries } from 'react-query';
 import isEmpty from 'lodash/isEmpty';
+import chunk from 'lodash/chunk';
+import uniq from 'lodash/uniq';
+import { trainingMap } from '../ExcelConverterWorker';
 
 const columns = [
   { key: 'dataElement', name: 'Data Element', resizable: true, sortable: true},
@@ -85,10 +88,24 @@ export const postAggregateData = async(bodyData)=>{
 export const hasTaskCompleted = (task) => {
     return task?.some((t)=>t?.completed);
 }
-  
+
+export const getGridColumns = (data=[],type)=>{
+    if(type === 'TRACKER_DATA'){
+        return data?.map((m)=>({ 
+            key: m?.old, 
+            name: m?.old, 
+            resizable: true, 
+            sortable: true
+        })
+        )
+    }
+    return columns;
+
+}
 export const ImportAggregateData = () => {   
      /* the component state is an HTML string */
     const [__html, setHtml] = useState("");
+    const [gridColumns, setGridColumns] = useState(columns);
     const workerFile = useWorker(createWorker);
     const queryClient = useQueryClient();
     const [rows, setRows] = useState([]);
@@ -103,6 +120,8 @@ export const ImportAggregateData = () => {
     const [type, setType ] = useState(undefined);
     const [orgUnits,setOrgUnits] = useState([]);
     const [events,setEvents] = useState([]);
+    const [dsOrgUnits,setDsOrgUnits] = useState([]);
+    const [dsEvents,setDsEvents] = useState([]);
     const [crossChecked, setCrossChecked] = useState(false);
     const { mutate, isLoading:posting } = useMutation(postAggregateData, {
         onSuccess: data => {
@@ -117,16 +136,17 @@ export const ImportAggregateData = () => {
     });
     const { data:summaries, isLoading: summaryCompleted } = useQuery({ 
         queryKey: [`system/taskSummaries/${message?.jobType}/${taskId}`],
-        enabled: !!taskId && !!message?.jobType && taskCompleted
+        enabled: !!taskId && !!message?.jobType && taskCompleted && crossChecked
     });
     const { data:fetchOrgUnits, isLoading: fetchOrgUnitsLoading } = useQuery({ 
-        queryKey: [`organisationUnits?filter=shortName:in:[${ orgUnits?.join(',')}]`],
-        enabled: !isEmpty(orgUnits) && validated
+        queryKey: [`organisationUnits?fields=id,name,code,shortName&filter=shortName:in:[${ orgUnits?.join(',')}]`],
+        enabled: !isEmpty(orgUnits) && validated && !crossChecked
     });
-    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQuery({ 
-        queryKey: [`tracker/trackedEntities.json?program=s8WUHekh0aU&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ events?.join(';')}&fields=*,!relationships,!programOwners,!createdBy,!updatedBy`],
-        enabled: !isEmpty(events) && validated
-    });
+    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQueries(events?.map((event)=>({ 
+        queryKey: [`tracker/trackedEntities.json?program=s8WUHekh0aU&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=*,!relationships,!programOwners,!createdBy,!updatedBy`],
+        enabled: !isEmpty(events) && validated && !crossChecked
+
+    })));
 
     
     const reviewData=async()=>{
@@ -140,13 +160,21 @@ export const ImportAggregateData = () => {
     }
     const submitData = async ()=>{
         if(validated && crossChecked){
-            const dataValues = {
-                type: type,
-                data:{
-                    dataValues: rows
-                }
-            };
-            mutate(dataValues); 
+            if(type === 'TRACKER_DATA'){
+                const sData = await workerFile.createTrackerPayload(rows,dsEvents,dsOrgUnits);
+                mutate({
+                    type: type,
+                    data: sData
+                });  
+            }
+            else{
+                mutate({
+                    type: type,
+                    data:{
+                        dataValues: rows
+                    }
+                }); 
+            }
         } 
         else{
             setCompleted(false);
@@ -159,13 +187,17 @@ export const ImportAggregateData = () => {
         fileReader.readAsArrayBuffer(files[0]);
         fileReader.onload = async(e) => {
             const fileData = await workerFile.getUploadedDataFile(e?.target?.result);
-            const validateOrgUnits = await workerFile.getElementByProperty(fileData,'Event_District');
+            const pdOrgUnits = await workerFile.getElementByProperty(fileData,'Participant_District_ECHO');
+            const epOrgUnits = await workerFile.getElementByProperty(fileData,'Event_Province_ECHO');
+            const edOrgUnits = await workerFile.getElementByProperty(fileData,'Event_District_ECHO');
+            const ppOrgUnits = await workerFile.getElementByProperty(fileData,'Participant_Province_ECHO');
             const validateParticipants = await workerFile.getElementByProperty(fileData,'Participant_ID');
-            console.log("Participants:",validateParticipants);
+            const validateOrgUnits = uniq([...pdOrgUnits,...epOrgUnits,...edOrgUnits,...ppOrgUnits]);
             setOrgUnits(validateOrgUnits);
-            setEvents(validateParticipants);
-            const sData = await workerFile.getUploadedDataFile(fileData,type,'bdV6upF84Hd');
+            setEvents(chunk(validateParticipants,70));
+            const sData = await workerFile.getUploadedData(fileData,type,'bdV6upF84Hd');
             setRows(sData);
+            setGridColumns(getGridColumns(trainingMap,type));
         }; 
     }
     const onRemove =()=>{       
@@ -178,7 +210,7 @@ export const ImportAggregateData = () => {
     useEffect(()=>{
         const observer = new QueryObserver(queryClient, { 
             queryKey: [`system/tasks/${message?.jobType}/${taskId}`],
-            enabled: !!taskId && !!message?.jobType && !taskCompleted,
+            enabled: !!taskId && !!message?.jobType && !taskCompleted && crossChecked,
             refetchInterval: ()=>{
                 if(taskCompleted) {
                     return false;
@@ -196,24 +228,28 @@ export const ImportAggregateData = () => {
         return ()=>{
             unsubscribe();
         }
-    },[taskId,message?.jobType,queryClient,taskCompleted]);
+    },[taskId,message?.jobType,queryClient,taskCompleted, crossChecked]);
 
     useEffect(()=>{
-        if(hasTaskCompleted(tasks) && !summaryCompleted){
+        if(hasTaskCompleted(tasks) && !summaryCompleted && crossChecked){
             setTaskCompleted(true);
         }
         else{
             setTaskCompleted(false);
         }
-    },[summaryCompleted,tasks]);
+    },[summaryCompleted,tasks, crossChecked]);
+
     useEffect(()=>{
-        if(!fetchEventsLoading && !fetchOrgUnitsLoading){
+        if(!fetchEventsLoading && !fetchOrgUnitsLoading && validated){
+            setDsOrgUnits(fetchOrgUnits?.organisationUnits);
+            setDsEvents(fetchEvents);
             setCrossChecked(true);
         }
         else{
             setCrossChecked(false);  
         }
-    },[fetchEventsLoading, fetchOrgUnitsLoading]);
+
+    },[fetchEventsLoading, fetchOrgUnitsLoading,validated,fetchOrgUnits?.organisationUnits,fetchEvents]);
     return (
         <Container css={ classes.root }>
             {
@@ -324,7 +360,7 @@ export const ImportAggregateData = () => {
                 ):(
                     <>
                         <DataGrid 
-                            columns={columns} 
+                            columns={gridColumns} 
                             rows={rows} 
                             css={ classes.validateCss} 
                         />

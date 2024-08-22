@@ -170,6 +170,23 @@ export const nativeMerge =(left=[],right=[],keys=[])=>{
  * @param {*} columns 
  * @returns 
  */
+export const nativeSepLabels = (data,sep=false,key={'old':" ",'new':"_"})=>{
+    return map(data,(d)=>{
+        Object.keys(d)?.forEach((c)=>{
+            if(sep){
+                set(d,c?.replaceAll(key.old,key.new),get(d,c));
+                delete d?.[c];
+            }            
+        });
+        return d;
+    })
+}
+/**
+ * Rename columns names
+ * @param {*} data 
+ * @param {*} columns 
+ * @returns 
+ */
 export const nativeRenameLabels = (data,columns=[])=>{
     return map(data,(d)=>{
         columns?.forEach((c)=>{

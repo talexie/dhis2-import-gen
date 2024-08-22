@@ -1,9 +1,62 @@
 import { read, utils, write } from 'xlsx';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
-import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeRenameLabels, nativeAddLabels, toValue } from './utils';
+import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeSepLabels,nativeRenameLabels, nativeAddLabels, toValue } from './utils';
 import { format } from 'date-fns';
 
+export const trainingMap = [
+    {old:"Event_ID",new:"NbY39IsysW8"},
+    {old:"Findname",new:"zpbuh92IZv5"},
+    {old:"Participant_ID",new:"PnTyfCzi21U"},
+    {old:"Participant_enroll_type",new:"ZbV6b9nyjEA"},
+    {old:"_ComputedKey",new:"zPurCMBL0Nu"},
+    {old:"Event_USAID_IR",new:"RhvGRpZugO3"},
+    {old:"Event_USAID_SubIR",new:"OjJycXuMuZk"},
+    {old:"Event_USAID_ACT",new:"GvmIaOBA03d"},
+    {old:"Event_MOU_SO",new:"lUy2eqH1sEJ"},
+    {old:"Event_MOU_SubSO",new:"KzMfUxbeFzD"},
+    {old:"Event_MOU_ACT",new:"Cy318oojbdQ"},
+    {old:"Event_MOU_and_Ncode",new:"fcu3uzzjyKs"},
+    {old:"Event_location",new:"PRGOGappybO"},
+    {old:"Event_Province_ECHO",new:"MecFf6Wq7LR"},
+    {old:"Event_District_ECHO",new:"n0ShOa0FxbX"},
+    {old:"Event_Other_Location",new:"iagm7CqAJJh"},
+    {old:"Event_name",new:"rl6qyAcUs38"},
+    {old:"Event_Domain",new:"Vage2qvHXd0"},
+    {old:"Event_Activity_topic",new:"TFC0Rw839uT"},
+    {old:"Event_type",new:"vzTfKRtECRq"},
+    {old:"Event_Internal_Project",new:"VEP9Sw6YF8n"},
+    {old:"Event_USAID_report_FOR_TRAINING_INDICATOR_ONLY",new:"LQtnBdLYXpt"},
+    {old:"Event_MOU_report",new:"c0AabYVBn3m"},
+    {old:"Event_Organizer_by",new:"U5ObMxm5NK8"},
+    {old:"Event_level",new:"UdE4lSfvq3g"},
+    {old:"Event_Topic_areas",new:"FlgUIrpzdAk"},
+    {old:"Event_Topic_areas_by_SO",new:"llmn6FOCToG"},
+    {old:"Event_Start_date",new:"gc5xwL8Iov7"},
+    {old:"Event_End_date",new:"XRg8WWy75xH"},
+    {old:"Total_number_of_participants",new:"ItA7s4eRtgD"},
+    {old:"Total_number_of_female_participants",new:"n3E7I8XIsGW"},
+    {old:"Was_the_event_engage_a_large_number_of_participants",new:"YOIw7kXDTCB"},
+    {old:"Participant_Name",new:"SQ1xgm6PPJA"},
+    {old:"Participant_Surname",new:"liQTjxYq72E"},
+    {old:"Participant_Gender",new:"fe1F4nvTxPX"},
+    {old:"Participant_Province_ECHO",new:"jKpfUlsauCD"},
+    {old:"Participant_District_ECHO",new:"lXstk077AsZ"},
+    {old:"Participant_work_village",new:"EpxTg68OtYJ"},
+    {old:"Participant_Official_Position",new:"TwqvBE6IVxN"},
+    {old:"Participant_Cleaned_Positions",new:"uE16E2Rnx16"},
+    {old:"Participant_Responsible_unit",new:"B4mCRObggzm"},
+    {old:"Participant_Organization_Name",new:"JvQcAg9kiUH"},
+    {old:"Participant_Organization_type",new:"EIwXld7Sc9o"},
+    {old:"Participant_Organization_Level",new:"M2mQBNAhYwW"},
+    {old:"Participant_Contact_Number",new:"pOKzZubB27Y"},
+    {old:"Participant_WhatsApp_number",new:"InTacvgZhpW"},
+    {old:"Event_USAID_Type",new:"Q2XqijFJnIr"},
+    {old:"Event_USAID_Domain",new:"Kfc4bffUKU2"},
+    {old:"Event_USAID_Indicator",new:"cwp2WfIfxKj"},
+    {old:"Event_MOU_Type",new:"xpUsddrA1TP"}
+    
+];
 export const createDhis2Import =(file)=>{
     const wb = read(file);
     const ws = wb.Sheets[wb.SheetNames[0]];
@@ -362,8 +415,18 @@ export const getUploadFile = (file)=>{
  * @param {*} property defaults to 'code' 
  * @returns 
  */
-export const findElementByProperty =(data,value,property='code')=>{
+export const findElementByProperty =(data=[],value="",property='code')=>{
     return data?.find((ou)=>get(ou,property) === value);
+}
+
+/**
+ * Find Entity by attribute 
+ * @param {*} data 
+ * @param {*} property defaults to 'code' 
+ * @returns 
+ */
+export const findEntityByAttribute =(data=[],value="",property='code')=>{
+    return data?.find((e)=>e?.attributes?.some((attr)=>get(attr,property) === value));
 }
 
 /**
@@ -383,61 +446,199 @@ export const getElementByProperty =(data,property='code')=>{
  * @param {*} data 
  * @returns 
  */
-export const createTrackerDataFile=(data)=>{
-    const renamedData = nativeRenameLabels(data,[
-        {old:"Event_ID",new:"NbY39IsysW8"},
-        {old:"Findname",new:"zpbuh92IZv5"},
-        {old:"Participant_ID",new:"PnTyfCzi21U"},
-        {old:"Participant_enroll_type",new:"ZbV6b9nyjEA"},
-        {old:"_ComputedKey",new:"zPurCMBL0Nu"},
-        {old:"Event_USAID_IR",new:"RhvGRpZugO3"},
-        {old:"Event_USAID_SubIR",new:"OjJycXuMuZk"},
-        {old:"Event_USAID_ACT",new:"GvmIaOBA03d"},
-        {old:"Event_MOU_SO",new:"lUy2eqH1sEJ"},
-        {old:"Event_MOU_SubSO",new:"KzMfUxbeFzD"},
-        {old:"Event_MOU_ACT",new:"Cy318oojbdQ"},
-        {old:"Event_MOU_and_Ncode",new:"fcu3uzzjyKs"},
-        {old:"Event_location",new:"PRGOGappybO"},
-        {old:"Event_Province",new:"MecFf6Wq7LR"},
-        {old:"Event_District",new:"n0ShOa0FxbX"},
-        {old:"Event_Other_Location",new:"iagm7CqAJJh"},
-        {old:"Event_name",new:"rl6qyAcUs38"},
-        {old:"Event_Domain",new:"Vage2qvHXd0"},
-        {old:"Event_Activity_topic",new:"TFC0Rw839uT"},
-        {old:"Event_type",new:"vzTfKRtECRq"},
-        {old:"Event_Internal_Project",new:"VEP9Sw6YF8n"},
-        {old:"Event_USAID_report_FOR_TRAINING_INDICATOR_ONLY",new:"LQtnBdLYXpt"},
-        {old:"Event_MOU_report",new:"c0AabYVBn3m"},
-        {old:"Event_Organizer_by",new:"U5ObMxm5NK8"},
-        {old:"Event_level",new:"UdE4lSfvq3g"},
-        {old:"Event_Topic_areas",new:"FlgUIrpzdAk"},
-        {old:"Event_Topic_areas_by_SO",new:"llmn6FOCToG"},
-        {old:"Event_Start_date",new:"gc5xwL8Iov7"},
-        {old:"Event_End_date",new:"XRg8WWy75xH"},
-        {old:"Total_number_of_participants",new:"ItA7s4eRtgD"},
-        {old:"Total_number_of_female_participants",new:"n3E7I8XIsGW"},
-        {old:"Was_the_event_engage_a_large_number_of_participants",new:"YOIw7kXDTCB"},
-        {old:"Participant_Name",new:"SQ1xgm6PPJA"},
-        {old:"Participant_Surname",new:"liQTjxYq72E"},
-        {old:"Participant_Gender",new:"fe1F4nvTxPX"},
-        {old:"Participant_work_Province",new:"jKpfUlsauCD"},
-        {old:"Participant_work_District",new:"lXstk077AsZ"},
-        {old:"Participant_work_village",new:"EpxTg68OtYJ"},
-        {old:"Participant_Official_Position",new:"TwqvBE6IVxN"},
-        {old:"Participant_Cleaned_Positions",new:"uE16E2Rnx16"},
-        {old:"Participant_Responsible_unit",new:"B4mCRObggzm"},
-        {old:"Participant_Organization_Name",new:"JvQcAg9kiUH"},
-        {old:"Participant_Organization_type",new:"EIwXld7Sc9o"},
-        {old:"Participant_Organization_Level",new:"M2mQBNAhYwW"},
-        {old:"Participant_Contact_Number",new:"pOKzZubB27Y"},
-        {old:"Participant_WhatsApp_number",new:"InTacvgZhpW"},
-        {old:"Event_USAID_Type",new:"Q2XqijFJnIr"},
-        {old:"Event_USAID_Domain",new:"Kfc4bffUKU2"},
-        {old:"Event_USAID_Indicator",new:"cwp2WfIfxKj"},
-        {old:"Event_MOU_Type",new:"xpUsddrA1TP"}
-        
-    ]);
+export const createTrackerDataFile=(data=[])=>{
+    const renamedData = nativeRenameLabels(data,trainingMap);
+    // Merge with OrgUnits,
+    //const mergeWithOrgUnits = nativeMerge(renamedData,orgUnits,['id'])
+    // Merge with Events
+    //const mergeWithEvents= nativeMerge(mergeWithOrgUnits,events)
     return renamedData;
+}
+export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
+    const mappedData = createTrackerDataFile(data);
+    return ({
+        trackedEntities: mappedData?.map((d)=>{
+            const te = findEntityByAttribute(entities,d?.PnTyfCzi21U,'PnTyfCzi21U');
+            const orgUnit = findElementByProperty(orgUnits,d?.lXstk077AsZ,'shortName');
+            const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName');
+            const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName');
+            const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName');
+            if(orgUnit){
+                if(te){
+                    return ({
+                        trackedEntity: te?.trackedEntity,
+                        trackedEntityType: te?.trackedEntityType,
+                        orgUnit: orgUnit.id,
+                        createdAt: te?.createdAt,
+                        enrollments:[
+                            {
+                                orgUnit: orgUnit.id,
+                                program: "jxMMKP58LC4",
+                                status: "ACTIVE",
+                                trackedEntityType: te?.trackedEntityType,
+                                attributes:[
+                                    {attribute:"zpbuh92IZv5",value: get(d,"zpbuh92IZv5")},
+                                    {attribute:"PnTyfCzi21U",value: get(d,"PnTyfCzi21U")},
+                                    {attribute:"SQ1xgm6PPJA",value: get(d,"SQ1xgm6PPJA")},
+                                    {attribute:"liQTjxYq72E",value: get(d,"liQTjxYq72E")},
+                                    {attribute:"fe1F4nvTxPX",value: get(d,"fe1F4nvTxPX")},
+                                    {attribute:"jKpfUlsauCD",value: ppOrgUnit?.id},
+                                    {attribute:"lXstk077AsZ",value: orgUnit?.id},
+                                    {attribute:"EpxTg68OtYJ",value: get(d,"EpxTg68OtYJ")},
+                                    {attribute:"TwqvBE6IVxN",value: get(d,"TwqvBE6IVxN")},
+                                    {attribute:"uE16E2Rnx16",value: get(d,"uE16E2Rnx16")},
+                                    {attribute:"B4mCRObggzm",value: get(d,"B4mCRObggzm")},
+                                    {attribute:"JvQcAg9kiUH",value: get(d,"JvQcAg9kiUH")},
+                                    {attribute:"EIwXld7Sc9o",value: get(d,"EIwXld7Sc9o")},
+                                    {attribute:"M2mQBNAhYwW",value: get(d,"M2mQBNAhYwW")},
+                                    {attribute:"pOKzZubB27Y",value: get(d,"pOKzZubB27Y")},
+                                    {attribute:"InTacvgZhpW",value: get(d,"InTacvgZhpW")}
+                                ],
+                                events:[
+                                    {
+                                        occurredAt: format(new Date(),'yyyy-MM-dd'),
+                                        orgUnit: orgUnit.id,
+                                        program: "jxMMKP58LC4",
+                                        programStage: "pjs7MjdYttv",
+                                        status: "COMPLETED",
+                                        trackedEntityType: te?.trackedEntityType,
+                                        dataValues:[
+                                            {dataElement:"NbY39IsysW8",value: get(d,"NbY39IsysW8")},
+                                            {dataElement:"ZbV6b9nyjEA",value: get(d,"ZbV6b9nyjEA")},
+                                            {dataElement:"zPurCMBL0Nu",value: get(d,"zPurCMBL0Nu")},
+                                            {dataElement:"RhvGRpZugO3",value: get(d,"RhvGRpZugO3")},
+                                            {dataElement:"OjJycXuMuZk",value: get(d,"OjJycXuMuZk")},
+                                            {dataElement:"GvmIaOBA03d",value: get(d,"GvmIaOBA03d")},
+                                            {dataElement:"lUy2eqH1sEJ",value: get(d,"lUy2eqH1sEJ")},
+                                            {dataElement:"KzMfUxbeFzD",value: get(d,"KzMfUxbeFzD")},
+                                            {dataElement:"Cy318oojbdQ",value: get(d,"Cy318oojbdQ")},
+                                            {dataElement:"fcu3uzzjyKs",value: get(d,"fcu3uzzjyKs")},
+                                            {dataElement:"PRGOGappybO",value: get(d,"PRGOGappybO")},
+                                            {dataElement:"MecFf6Wq7LR",value: epOrgUnit?.id},
+                                            {dataElement:"n0ShOa0FxbX",value: edOrgUnit?.id},
+                                            {dataElement:"iagm7CqAJJh",value: get(d,"iagm7CqAJJh")},
+                                            {dataElement:"rl6qyAcUs38",value: get(d,"rl6qyAcUs38")},
+                                            {dataElement:"Vage2qvHXd0",value: get(d,"Vage2qvHXd0")},
+                                            {dataElement:"TFC0Rw839uT",value: get(d,"TFC0Rw839uT")},
+                                            {dataElement:"vzTfKRtECRq",value: get(d,"vzTfKRtECRq")},
+                                            {dataElement:"VEP9Sw6YF8n",value: get(d,"VEP9Sw6YF8n")},
+                                            {dataElement:"LQtnBdLYXpt",value: get(d,"LQtnBdLYXpt")},
+                                            {dataElement:"c0AabYVBn3m",value: get(d,"c0AabYVBn3m")},
+                                            {dataElement:"U5ObMxm5NK8",value: get(d,"U5ObMxm5NK8")},
+                                            {dataElement:"UdE4lSfvq3g",value: get(d,"UdE4lSfvq3g")},
+                                            {dataElement:"FlgUIrpzdAk",value: get(d,"FlgUIrpzdAk")},
+                                            {dataElement:"llmn6FOCToG",value: get(d,"llmn6FOCToG")},
+                                            {dataElement:"gc5xwL8Iov7",value: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd')},
+                                            {dataElement:"XRg8WWy75xH",value: format(get(d,"XRg8WWy75xH"),'yyyy-MM-dd')},
+                                            {dataElement:"ItA7s4eRtgD",value: get(d,"ItA7s4eRtgD")},
+                                            {dataElement:"n3E7I8XIsGW",value: get(d,"n3E7I8XIsGW")},
+                                            {dataElement:"YOIw7kXDTCB",value: get(d,"YOIw7kXDTCB")},
+                                            {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
+                                            {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
+                                            {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
+                                            {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
+
+                                        ]?.filter((v)=>v?.value)
+                                    }
+                                ]       
+        
+                            }
+                        ]
+                    })
+                }
+                else{
+                    return ({
+                        //trackedEntity: "BNlcySayK3E",
+                        trackedEntityType: "WbDGDKGBjKh",
+                        orgUnit: orgUnit.id,
+                        createdAt: format(new Date(),'yyyy-MM-dd'),
+                        enrollments:[
+                            {
+                                occurredAt: format(new Date(),'yyyy-MM-dd'),
+                                orgUnit: orgUnit.id,
+                                program: "jxMMKP58LC4",
+                                status: "ACTIVE",
+                                trackedEntityType: "WbDGDKGBjKh",
+                                enrolledAt: format(new Date(),'yyyy-MM-dd'),
+                                attributes:[
+                                    {attribute:"zpbuh92IZv5",value: get(d,"zpbuh92IZv5")},
+                                    {attribute:"PnTyfCzi21U",value: get(d,"PnTyfCzi21U")},
+                                    {attribute:"SQ1xgm6PPJA",value: get(d,"SQ1xgm6PPJA")},
+                                    {attribute:"liQTjxYq72E",value: get(d,"liQTjxYq72E")},
+                                    {attribute:"fe1F4nvTxPX",value: get(d,"fe1F4nvTxPX")},
+                                    {attribute:"jKpfUlsauCD",value: ppOrgUnit?.id },
+                                    {attribute:"lXstk077AsZ",value: orgUnit?.id},
+                                    {attribute:"EpxTg68OtYJ",value: get(d,"EpxTg68OtYJ")},
+                                    {attribute:"TwqvBE6IVxN",value: get(d,"TwqvBE6IVxN")},
+                                    {attribute:"uE16E2Rnx16",value: get(d,"uE16E2Rnx16")},
+                                    {attribute:"B4mCRObggzm",value: get(d,"B4mCRObggzm")},
+                                    {attribute:"JvQcAg9kiUH",value: get(d,"JvQcAg9kiUH")},
+                                    {attribute:"EIwXld7Sc9o",value: get(d,"EIwXld7Sc9o")},
+                                    {attribute:"M2mQBNAhYwW",value: get(d,"M2mQBNAhYwW")},
+                                    {attribute:"pOKzZubB27Y",value: get(d,"pOKzZubB27Y")},
+                                    {attribute:"InTacvgZhpW",value: get(d,"InTacvgZhpW")}
+                                ],
+                                events:[
+                                    {
+                                        occurredAt: format(new Date(),'yyyy-MM-dd'),
+                                        orgUnit: orgUnit.id,
+                                        program: "jxMMKP58LC4",
+                                        programStage: "pjs7MjdYttv",
+                                        status: "COMPLETED",
+                                        trackedEntityType: "WbDGDKGBjKh",
+                                        enrolledAt: format(new Date(),'yyyy-MM-dd'),
+                                        enrollmentStatus: "ACTIVE",
+                                        dataValues:[
+                                            {dataElement:"NbY39IsysW8",value: get(d,"NbY39IsysW8")},
+                                            {dataElement:"ZbV6b9nyjEA",value: get(d,"ZbV6b9nyjEA")},
+                                            {dataElement:"zPurCMBL0Nu",value: get(d,"zPurCMBL0Nu")},
+                                            {dataElement:"RhvGRpZugO3",value: get(d,"RhvGRpZugO3")},
+                                            {dataElement:"OjJycXuMuZk",value: get(d,"OjJycXuMuZk")},
+                                            {dataElement:"GvmIaOBA03d",value: get(d,"GvmIaOBA03d")},
+                                            {dataElement:"lUy2eqH1sEJ",value: get(d,"lUy2eqH1sEJ")},
+                                            {dataElement:"KzMfUxbeFzD",value: get(d,"KzMfUxbeFzD")},
+                                            {dataElement:"Cy318oojbdQ",value: get(d,"Cy318oojbdQ")},
+                                            {dataElement:"fcu3uzzjyKs",value: get(d,"fcu3uzzjyKs")},
+                                            {dataElement:"PRGOGappybO",value: get(d,"PRGOGappybO")},
+                                            {dataElement:"MecFf6Wq7LR",value: epOrgUnit?.id},
+                                            {dataElement:"n0ShOa0FxbX",value: edOrgUnit?.id},
+                                            {dataElement:"iagm7CqAJJh",value: get(d,"iagm7CqAJJh")},
+                                            {dataElement:"rl6qyAcUs38",value: get(d,"rl6qyAcUs38")},
+                                            {dataElement:"Vage2qvHXd0",value: get(d,"Vage2qvHXd0")},
+                                            {dataElement:"TFC0Rw839uT",value: get(d,"TFC0Rw839uT")},
+                                            {dataElement:"vzTfKRtECRq",value: get(d,"vzTfKRtECRq")},
+                                            {dataElement:"VEP9Sw6YF8n",value: get(d,"VEP9Sw6YF8n")},
+                                            {dataElement:"LQtnBdLYXpt",value: get(d,"LQtnBdLYXpt")},
+                                            {dataElement:"c0AabYVBn3m",value: get(d,"c0AabYVBn3m")},
+                                            {dataElement:"U5ObMxm5NK8",value: get(d,"U5ObMxm5NK8")},
+                                            {dataElement:"UdE4lSfvq3g",value: get(d,"UdE4lSfvq3g")},
+                                            {dataElement:"FlgUIrpzdAk",value: get(d,"FlgUIrpzdAk")},
+                                            {dataElement:"llmn6FOCToG",value: get(d,"llmn6FOCToG")},
+                                            {dataElement:"gc5xwL8Iov7",value: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd')},
+                                            {dataElement:"XRg8WWy75xH",value: format(get(d,"XRg8WWy75xH"),'yyyy-MM-dd')},
+                                            {dataElement:"ItA7s4eRtgD",value: get(d,"ItA7s4eRtgD")},
+                                            {dataElement:"n3E7I8XIsGW",value: get(d,"n3E7I8XIsGW")},
+                                            {dataElement:"YOIw7kXDTCB",value: get(d,"YOIw7kXDTCB")},
+                                            {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
+                                            {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
+                                            {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
+                                            {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
+
+                                        ]?.filter((v)=>v?.value)
+                                    }
+                                ]
+        
+        
+                            }
+                        ]
+                    })
+                }
+            }
+            else{
+                return undefined
+            }
+        }).filter(String).filter(Boolean)
+    })
 }
 
 /**
@@ -461,7 +662,8 @@ export const getUploadedDataFile = (file)=>{
  */
 export const getUploadedData = (data,type,attribute)=>{
     if(type ==='TRACKER_DATA'){
-        return createTrackerDataFile(data);
+        //return nativeSepLabels(data,false);
+        return data;
     }
     else{
         const dropData = nativeDropLabels(data,['Numerator', 'Denominator', 'Divisor', 'Multiplier','Factor']);
@@ -515,7 +717,7 @@ export const getUploadedData = (data,type,attribute)=>{
  * @param {*} data 
  * @returns 
  */
-export const reviewDhis2Import =(data)=>{
+export const reviewDhis2Import =(data)=>{   
     /* create workbook and display HTML */
     const wb = utils.book_new();
     const ws = utils.json_to_sheet(data);
