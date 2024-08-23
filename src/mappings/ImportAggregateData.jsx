@@ -122,7 +122,8 @@ export const ImportAggregateData = () => {
     const [events,setEvents] = useState([]);
     const [dsOrgUnits,setDsOrgUnits] = useState([]);
     const [dsEvents,setDsEvents] = useState([]);
-    const [crossChecked, setCrossChecked] = useState(false);
+    const [ouChecked, setOuChecked] = useState(false);
+    const [evChecked, setEvChecked] = useState(false);
     const { mutate, isLoading:posting } = useMutation(postAggregateData, {
         onSuccess: data => {
             setMessage(data?.response);
@@ -136,17 +137,20 @@ export const ImportAggregateData = () => {
     });
     const { data:summaries, isLoading: summaryCompleted } = useQuery({ 
         queryKey: [`system/taskSummaries/${message?.jobType}/${taskId}`],
-        enabled: !!taskId && !!message?.jobType && taskCompleted && crossChecked
+        enabled: !!taskId && !!message?.jobType && taskCompleted
     });
     const { data:fetchOrgUnits, isLoading: fetchOrgUnitsLoading } = useQuery({ 
         queryKey: [`organisationUnits?fields=id,name,code,shortName&filter=shortName:in:[${ orgUnits?.join(',')}]`],
-        enabled: !isEmpty(orgUnits) && validated && !crossChecked
+        enabled: !isEmpty(orgUnits) && validated && !ouChecked
     });
-    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQueries(events?.map((event)=>({ 
-        queryKey: [`tracker/trackedEntities.json?program=s8WUHekh0aU&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=*,!relationships,!programOwners,!createdBy,!updatedBy`],
-        enabled: !isEmpty(events) && validated && !crossChecked
-
-    })));
+    /*const { data:fetchEvents, isLoading: fetchEventsLoading } = useQueries(events?.map((event)=>({ 
+        queryKey: [`tracker/trackedEntities.json?program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=*,!relationships,!programOwners,!createdBy,!updatedBy`],
+        enabled: !isEmpty(events) && validated && !evChecked
+    })));*/
+    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQuery({ 
+        queryKey: [`tracker/trackedEntities.json?paging=false&program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ events?.join(';')}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,occuredAt,enrolledAt,program,events[dataValues[event,dataElement,value]]],!relationships,!programOwners,!createdBy,!updatedBy`],
+        enabled: !isEmpty(events) && validated && !evChecked
+    });
 
     
     const reviewData=async()=>{
@@ -159,12 +163,15 @@ export const ImportAggregateData = () => {
         setValidated(true);
     }
     const submitData = async ()=>{
-        if(validated && crossChecked){
+        if(validated && evChecked && ouChecked){
             if(type === 'TRACKER_DATA'){
-                const sData = await workerFile.createTrackerPayload(rows,dsEvents,dsOrgUnits);
+                const records = await workerFile.createTrackerPayload(rows,dsEvents,dsOrgUnits);
+                const mergedRecords = await workerFile.mergeRecords(records);
                 mutate({
                     type: type,
-                    data: sData
+                    data: {
+                        trackedEntities: mergedRecords
+                    }
                 });  
             }
             else{
@@ -194,7 +201,8 @@ export const ImportAggregateData = () => {
             const validateParticipants = await workerFile.getElementByProperty(fileData,'Participant_ID');
             const validateOrgUnits = uniq([...pdOrgUnits,...epOrgUnits,...edOrgUnits,...ppOrgUnits]);
             setOrgUnits(validateOrgUnits);
-            setEvents(chunk(validateParticipants,70));
+            //setEvents(chunk(uniq(validateParticipants),70));
+            setEvents(uniq(validateParticipants));
             const sData = await workerFile.getUploadedData(fileData,type,'bdV6upF84Hd');
             setRows(sData);
             setGridColumns(getGridColumns(trainingMap,type));
@@ -210,7 +218,7 @@ export const ImportAggregateData = () => {
     useEffect(()=>{
         const observer = new QueryObserver(queryClient, { 
             queryKey: [`system/tasks/${message?.jobType}/${taskId}`],
-            enabled: !!taskId && !!message?.jobType && !taskCompleted && crossChecked,
+            enabled: !!taskId && !!message?.jobType && !taskCompleted,
             refetchInterval: ()=>{
                 if(taskCompleted) {
                     return false;
@@ -228,28 +236,29 @@ export const ImportAggregateData = () => {
         return ()=>{
             unsubscribe();
         }
-    },[taskId,message?.jobType,queryClient,taskCompleted, crossChecked]);
+    },[taskId,message?.jobType,queryClient,taskCompleted]);
 
     useEffect(()=>{
-        if(hasTaskCompleted(tasks) && !summaryCompleted && crossChecked){
+        if(hasTaskCompleted(tasks) && !summaryCompleted){
             setTaskCompleted(true);
         }
         else{
             setTaskCompleted(false);
         }
-    },[summaryCompleted,tasks, crossChecked]);
+    },[summaryCompleted,tasks]);
 
     useEffect(()=>{
-        if(!fetchEventsLoading && !fetchOrgUnitsLoading && validated){
+        if(!fetchOrgUnitsLoading && validated){
             setDsOrgUnits(fetchOrgUnits?.organisationUnits);
-            setDsEvents(fetchEvents);
-            setCrossChecked(true);
+            setOuChecked(true);
         }
-        else{
-            setCrossChecked(false);  
+    },[fetchOrgUnitsLoading,validated,fetchOrgUnits?.organisationUnits]);
+    useEffect(()=>{
+        if(!fetchEventsLoading && validated){
+            setDsEvents(fetchEvents?.trackedEntities);
+            setEvChecked(true);
         }
-
-    },[fetchEventsLoading, fetchOrgUnitsLoading,validated,fetchOrgUnits?.organisationUnits,fetchEvents]);
+    },[fetchEventsLoading, validated,fetchEvents?.trackedEntities]);
     return (
         <Container css={ classes.root }>
             {
@@ -340,7 +349,7 @@ export const ImportAggregateData = () => {
                                     type="button"
                                     value="default"
                                     onClick={ submitData }
-                                    disabled ={ completed || taskCompleted }
+                                    disabled ={ completed || taskCompleted || (type ==='TRACKER_DATA' && (!ouChecked || !evChecked)) }
                                 >
                                    { completed || taskCompleted?"Submitted" : "Submit" }
                                 </Button>

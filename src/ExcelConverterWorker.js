@@ -3,6 +3,7 @@ import get from 'lodash/get';
 import uniq from 'lodash/uniq';
 import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeSepLabels,nativeRenameLabels, nativeAddLabels, toValue } from './utils';
 import { format } from 'date-fns';
+import concat from 'lodash/concat';
 
 export const trainingMap = [
     {old:"Event_ID",new:"NbY39IsysW8"},
@@ -426,8 +427,34 @@ export const findElementByProperty =(data=[],value="",property='code')=>{
  * @returns 
  */
 export const findEntityByAttribute =(data=[],value="",property='code')=>{
-    return data?.find((e)=>e?.attributes?.some((attr)=>get(attr,property) === value));
+    return data?.find((e)=>e?.attributes?.some((attr)=>((attr?.attribute === property) && (attr.value === value))));
 }
+
+export const mergeRecords = (records,property="trackedEntity") => {
+    const mergedMap = new Map();
+  
+    records.forEach(record => {
+    
+      const key =  get(record,property);
+      if (mergedMap.has(key)) {
+        const existingRecord = mergedMap.get(key);
+        existingRecord.enrollments =[
+            {
+                ...existingRecord?.enrollments?.[0],
+                events: concat(existingRecord?.enrollments?.[0].events,record?.enrollments?.[0].events)
+            }
+        ]
+        mergedMap.set(key, { ...existingRecord });
+      } 
+      else {
+        mergedMap.set(key, record);
+      }
+    });
+    return Array.from(mergedMap.values());
+  }
+  
+
+  
 
 /**
  * Get Element by property 
@@ -456,189 +483,190 @@ export const createTrackerDataFile=(data=[])=>{
 }
 export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
     const mappedData = createTrackerDataFile(data);
-    return ({
-        trackedEntities: mappedData?.map((d)=>{
-            const te = findEntityByAttribute(entities,d?.PnTyfCzi21U,'PnTyfCzi21U');
-            const orgUnit = findElementByProperty(orgUnits,d?.lXstk077AsZ,'shortName');
-            const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName');
-            const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName');
-            const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName');
-            if(orgUnit){
-                if(te){
-                    return ({
-                        trackedEntity: te?.trackedEntity,
-                        trackedEntityType: te?.trackedEntityType,
-                        orgUnit: orgUnit.id,
-                        createdAt: te?.createdAt,
-                        enrollments:[
-                            {
-                                orgUnit: orgUnit.id,
-                                program: "jxMMKP58LC4",
-                                status: "ACTIVE",
-                                trackedEntityType: te?.trackedEntityType,
-                                attributes:[
-                                    {attribute:"zpbuh92IZv5",value: get(d,"zpbuh92IZv5")},
-                                    {attribute:"PnTyfCzi21U",value: get(d,"PnTyfCzi21U")},
-                                    {attribute:"SQ1xgm6PPJA",value: get(d,"SQ1xgm6PPJA")},
-                                    {attribute:"liQTjxYq72E",value: get(d,"liQTjxYq72E")},
-                                    {attribute:"fe1F4nvTxPX",value: get(d,"fe1F4nvTxPX")},
-                                    {attribute:"jKpfUlsauCD",value: ppOrgUnit?.id},
-                                    {attribute:"lXstk077AsZ",value: orgUnit?.id},
-                                    {attribute:"EpxTg68OtYJ",value: get(d,"EpxTg68OtYJ")},
-                                    {attribute:"TwqvBE6IVxN",value: get(d,"TwqvBE6IVxN")},
-                                    {attribute:"uE16E2Rnx16",value: get(d,"uE16E2Rnx16")},
-                                    {attribute:"B4mCRObggzm",value: get(d,"B4mCRObggzm")},
-                                    {attribute:"JvQcAg9kiUH",value: get(d,"JvQcAg9kiUH")},
-                                    {attribute:"EIwXld7Sc9o",value: get(d,"EIwXld7Sc9o")},
-                                    {attribute:"M2mQBNAhYwW",value: get(d,"M2mQBNAhYwW")},
-                                    {attribute:"pOKzZubB27Y",value: get(d,"pOKzZubB27Y")},
-                                    {attribute:"InTacvgZhpW",value: get(d,"InTacvgZhpW")}
-                                ],
-                                events:[
-                                    {
-                                        occurredAt: format(new Date(),'yyyy-MM-dd'),
-                                        orgUnit: orgUnit.id,
-                                        program: "jxMMKP58LC4",
-                                        programStage: "pjs7MjdYttv",
-                                        status: "COMPLETED",
-                                        trackedEntityType: te?.trackedEntityType,
-                                        dataValues:[
-                                            {dataElement:"NbY39IsysW8",value: get(d,"NbY39IsysW8")},
-                                            {dataElement:"ZbV6b9nyjEA",value: get(d,"ZbV6b9nyjEA")},
-                                            {dataElement:"zPurCMBL0Nu",value: get(d,"zPurCMBL0Nu")},
-                                            {dataElement:"RhvGRpZugO3",value: get(d,"RhvGRpZugO3")},
-                                            {dataElement:"OjJycXuMuZk",value: get(d,"OjJycXuMuZk")},
-                                            {dataElement:"GvmIaOBA03d",value: get(d,"GvmIaOBA03d")},
-                                            {dataElement:"lUy2eqH1sEJ",value: get(d,"lUy2eqH1sEJ")},
-                                            {dataElement:"KzMfUxbeFzD",value: get(d,"KzMfUxbeFzD")},
-                                            {dataElement:"Cy318oojbdQ",value: get(d,"Cy318oojbdQ")},
-                                            {dataElement:"fcu3uzzjyKs",value: get(d,"fcu3uzzjyKs")},
-                                            {dataElement:"PRGOGappybO",value: get(d,"PRGOGappybO")},
-                                            {dataElement:"MecFf6Wq7LR",value: epOrgUnit?.id},
-                                            {dataElement:"n0ShOa0FxbX",value: edOrgUnit?.id},
-                                            {dataElement:"iagm7CqAJJh",value: get(d,"iagm7CqAJJh")},
-                                            {dataElement:"rl6qyAcUs38",value: get(d,"rl6qyAcUs38")},
-                                            {dataElement:"Vage2qvHXd0",value: get(d,"Vage2qvHXd0")},
-                                            {dataElement:"TFC0Rw839uT",value: get(d,"TFC0Rw839uT")},
-                                            {dataElement:"vzTfKRtECRq",value: get(d,"vzTfKRtECRq")},
-                                            {dataElement:"VEP9Sw6YF8n",value: get(d,"VEP9Sw6YF8n")},
-                                            {dataElement:"LQtnBdLYXpt",value: get(d,"LQtnBdLYXpt")},
-                                            {dataElement:"c0AabYVBn3m",value: get(d,"c0AabYVBn3m")},
-                                            {dataElement:"U5ObMxm5NK8",value: get(d,"U5ObMxm5NK8")},
-                                            {dataElement:"UdE4lSfvq3g",value: get(d,"UdE4lSfvq3g")},
-                                            {dataElement:"FlgUIrpzdAk",value: get(d,"FlgUIrpzdAk")},
-                                            {dataElement:"llmn6FOCToG",value: get(d,"llmn6FOCToG")},
-                                            {dataElement:"gc5xwL8Iov7",value: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd')},
-                                            {dataElement:"XRg8WWy75xH",value: format(get(d,"XRg8WWy75xH"),'yyyy-MM-dd')},
-                                            {dataElement:"ItA7s4eRtgD",value: get(d,"ItA7s4eRtgD")},
-                                            {dataElement:"n3E7I8XIsGW",value: get(d,"n3E7I8XIsGW")},
-                                            {dataElement:"YOIw7kXDTCB",value: get(d,"YOIw7kXDTCB")},
-                                            {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
-                                            {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
-                                            {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
-                                            {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
+    return mappedData?.map((d)=>{
+        const te = findEntityByAttribute(entities,d?.PnTyfCzi21U,'PnTyfCzi21U');
+        const enrollment = te?.enrollments?.[0];
+        const orgUnit = findElementByProperty(orgUnits,d?.lXstk077AsZ,'shortName');
+        const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName');
+        const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName');
+        const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName');
+        if(orgUnit){
+            if(te){
+                return ({
+                    trackedEntity: te?.trackedEntity,
+                    trackedEntityType: te?.trackedEntityType,
+                    orgUnit: te?.orgUnit,
+                    //createdAt: te?.createdAt,
+                    enrollments:[
+                        {
+                            enrolledAt: format(new Date(enrollment?.enrolledAt),'yyyy-MM-dd'),
+                            enrollment: enrollment?.enrollment,
+                            orgUnit: te?.orgUnit,
+                            program: "jxMMKP58LC4",
+                            status: "ACTIVE",
+                            trackedEntityType: te?.trackedEntityType,
+                            attributes:[
+                                {attribute:"zpbuh92IZv5",value: get(d,"zpbuh92IZv5")},
+                                {attribute:"PnTyfCzi21U",value: get(d,"PnTyfCzi21U")},
+                                {attribute:"SQ1xgm6PPJA",value: get(d,"SQ1xgm6PPJA")},
+                                {attribute:"liQTjxYq72E",value: get(d,"liQTjxYq72E")},
+                                {attribute:"fe1F4nvTxPX",value: get(d,"fe1F4nvTxPX")},
+                                {attribute:"jKpfUlsauCD",value: ppOrgUnit?.id},
+                                {attribute:"lXstk077AsZ",value: orgUnit?.id},
+                                {attribute:"EpxTg68OtYJ",value: get(d,"EpxTg68OtYJ")},
+                                {attribute:"TwqvBE6IVxN",value: get(d,"TwqvBE6IVxN")},
+                                {attribute:"uE16E2Rnx16",value: get(d,"uE16E2Rnx16")},
+                                {attribute:"B4mCRObggzm",value: get(d,"B4mCRObggzm")},
+                                {attribute:"JvQcAg9kiUH",value: get(d,"JvQcAg9kiUH")},
+                                {attribute:"EIwXld7Sc9o",value: get(d,"EIwXld7Sc9o")},
+                                {attribute:"M2mQBNAhYwW",value: get(d,"M2mQBNAhYwW")},
+                                {attribute:"pOKzZubB27Y",value: get(d,"pOKzZubB27Y")},
+                                {attribute:"InTacvgZhpW",value: get(d,"InTacvgZhpW")}
+                            ]?.filter((v)=>v?.value),
+                            events:[
+                                {
+                                    occurredAt: format(new Date(),'yyyy-MM-dd'),
+                                    orgUnit: te?.orgUnit,
+                                    program: "jxMMKP58LC4",
+                                    programStage: "pjs7MjdYttv",
+                                    status: "COMPLETED",
+                                    trackedEntityType: te?.trackedEntityType,
+                                    dataValues:[
+                                        {dataElement:"NbY39IsysW8",value: get(d,"NbY39IsysW8")},
+                                        {dataElement:"ZbV6b9nyjEA",value: get(d,"ZbV6b9nyjEA")},
+                                        {dataElement:"zPurCMBL0Nu",value: get(d,"zPurCMBL0Nu")},
+                                        {dataElement:"RhvGRpZugO3",value: get(d,"RhvGRpZugO3")},
+                                        {dataElement:"OjJycXuMuZk",value: get(d,"OjJycXuMuZk")},
+                                        {dataElement:"GvmIaOBA03d",value: get(d,"GvmIaOBA03d")},
+                                        {dataElement:"lUy2eqH1sEJ",value: get(d,"lUy2eqH1sEJ")},
+                                        {dataElement:"KzMfUxbeFzD",value: get(d,"KzMfUxbeFzD")},
+                                        {dataElement:"Cy318oojbdQ",value: get(d,"Cy318oojbdQ")},
+                                        {dataElement:"fcu3uzzjyKs",value: get(d,"fcu3uzzjyKs")},
+                                        {dataElement:"PRGOGappybO",value: get(d,"PRGOGappybO")},
+                                        {dataElement:"MecFf6Wq7LR",value: epOrgUnit?.id},
+                                        {dataElement:"n0ShOa0FxbX",value: edOrgUnit?.id},
+                                        {dataElement:"iagm7CqAJJh",value: get(d,"iagm7CqAJJh")},
+                                        {dataElement:"rl6qyAcUs38",value: get(d,"rl6qyAcUs38")},
+                                        {dataElement:"Vage2qvHXd0",value: get(d,"Vage2qvHXd0")},
+                                        {dataElement:"TFC0Rw839uT",value: get(d,"TFC0Rw839uT")},
+                                        {dataElement:"vzTfKRtECRq",value: get(d,"vzTfKRtECRq")},
+                                        {dataElement:"VEP9Sw6YF8n",value: get(d,"VEP9Sw6YF8n")},
+                                        {dataElement:"LQtnBdLYXpt",value: get(d,"LQtnBdLYXpt")},
+                                        {dataElement:"c0AabYVBn3m",value: get(d,"c0AabYVBn3m")},
+                                        {dataElement:"U5ObMxm5NK8",value: get(d,"U5ObMxm5NK8")},
+                                        {dataElement:"UdE4lSfvq3g",value: get(d,"UdE4lSfvq3g")},
+                                        {dataElement:"FlgUIrpzdAk",value: get(d,"FlgUIrpzdAk")?.split(",")?.map((t)=>t?.trim())?.join(",")},
+                                        {dataElement:"llmn6FOCToG",value: get(d,"llmn6FOCToG")?.split(",")?.map((t)=>t?.trim())?.join(",")},
+                                        {dataElement:"gc5xwL8Iov7",value: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd')},
+                                        {dataElement:"XRg8WWy75xH",value: format(get(d,"XRg8WWy75xH"),'yyyy-MM-dd')},
+                                        {dataElement:"ItA7s4eRtgD",value: get(d,"ItA7s4eRtgD")},
+                                        {dataElement:"n3E7I8XIsGW",value: get(d,"n3E7I8XIsGW")},
+                                        {dataElement:"YOIw7kXDTCB",value: get(d,"YOIw7kXDTCB")},
+                                        {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
+                                        {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
+                                        {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
+                                        {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
 
-                                        ]?.filter((v)=>v?.value)
-                                    }
-                                ]       
-        
-                            }
-                        ]
-                    })
-                }
-                else{
-                    return ({
-                        //trackedEntity: "BNlcySayK3E",
-                        trackedEntityType: "WbDGDKGBjKh",
-                        orgUnit: orgUnit.id,
-                        createdAt: format(new Date(),'yyyy-MM-dd'),
-                        enrollments:[
-                            {
-                                occurredAt: format(new Date(),'yyyy-MM-dd'),
-                                orgUnit: orgUnit.id,
-                                program: "jxMMKP58LC4",
-                                status: "ACTIVE",
-                                trackedEntityType: "WbDGDKGBjKh",
-                                enrolledAt: format(new Date(),'yyyy-MM-dd'),
-                                attributes:[
-                                    {attribute:"zpbuh92IZv5",value: get(d,"zpbuh92IZv5")},
-                                    {attribute:"PnTyfCzi21U",value: get(d,"PnTyfCzi21U")},
-                                    {attribute:"SQ1xgm6PPJA",value: get(d,"SQ1xgm6PPJA")},
-                                    {attribute:"liQTjxYq72E",value: get(d,"liQTjxYq72E")},
-                                    {attribute:"fe1F4nvTxPX",value: get(d,"fe1F4nvTxPX")},
-                                    {attribute:"jKpfUlsauCD",value: ppOrgUnit?.id },
-                                    {attribute:"lXstk077AsZ",value: orgUnit?.id},
-                                    {attribute:"EpxTg68OtYJ",value: get(d,"EpxTg68OtYJ")},
-                                    {attribute:"TwqvBE6IVxN",value: get(d,"TwqvBE6IVxN")},
-                                    {attribute:"uE16E2Rnx16",value: get(d,"uE16E2Rnx16")},
-                                    {attribute:"B4mCRObggzm",value: get(d,"B4mCRObggzm")},
-                                    {attribute:"JvQcAg9kiUH",value: get(d,"JvQcAg9kiUH")},
-                                    {attribute:"EIwXld7Sc9o",value: get(d,"EIwXld7Sc9o")},
-                                    {attribute:"M2mQBNAhYwW",value: get(d,"M2mQBNAhYwW")},
-                                    {attribute:"pOKzZubB27Y",value: get(d,"pOKzZubB27Y")},
-                                    {attribute:"InTacvgZhpW",value: get(d,"InTacvgZhpW")}
-                                ],
-                                events:[
-                                    {
-                                        occurredAt: format(new Date(),'yyyy-MM-dd'),
-                                        orgUnit: orgUnit.id,
-                                        program: "jxMMKP58LC4",
-                                        programStage: "pjs7MjdYttv",
-                                        status: "COMPLETED",
-                                        trackedEntityType: "WbDGDKGBjKh",
-                                        enrolledAt: format(new Date(),'yyyy-MM-dd'),
-                                        enrollmentStatus: "ACTIVE",
-                                        dataValues:[
-                                            {dataElement:"NbY39IsysW8",value: get(d,"NbY39IsysW8")},
-                                            {dataElement:"ZbV6b9nyjEA",value: get(d,"ZbV6b9nyjEA")},
-                                            {dataElement:"zPurCMBL0Nu",value: get(d,"zPurCMBL0Nu")},
-                                            {dataElement:"RhvGRpZugO3",value: get(d,"RhvGRpZugO3")},
-                                            {dataElement:"OjJycXuMuZk",value: get(d,"OjJycXuMuZk")},
-                                            {dataElement:"GvmIaOBA03d",value: get(d,"GvmIaOBA03d")},
-                                            {dataElement:"lUy2eqH1sEJ",value: get(d,"lUy2eqH1sEJ")},
-                                            {dataElement:"KzMfUxbeFzD",value: get(d,"KzMfUxbeFzD")},
-                                            {dataElement:"Cy318oojbdQ",value: get(d,"Cy318oojbdQ")},
-                                            {dataElement:"fcu3uzzjyKs",value: get(d,"fcu3uzzjyKs")},
-                                            {dataElement:"PRGOGappybO",value: get(d,"PRGOGappybO")},
-                                            {dataElement:"MecFf6Wq7LR",value: epOrgUnit?.id},
-                                            {dataElement:"n0ShOa0FxbX",value: edOrgUnit?.id},
-                                            {dataElement:"iagm7CqAJJh",value: get(d,"iagm7CqAJJh")},
-                                            {dataElement:"rl6qyAcUs38",value: get(d,"rl6qyAcUs38")},
-                                            {dataElement:"Vage2qvHXd0",value: get(d,"Vage2qvHXd0")},
-                                            {dataElement:"TFC0Rw839uT",value: get(d,"TFC0Rw839uT")},
-                                            {dataElement:"vzTfKRtECRq",value: get(d,"vzTfKRtECRq")},
-                                            {dataElement:"VEP9Sw6YF8n",value: get(d,"VEP9Sw6YF8n")},
-                                            {dataElement:"LQtnBdLYXpt",value: get(d,"LQtnBdLYXpt")},
-                                            {dataElement:"c0AabYVBn3m",value: get(d,"c0AabYVBn3m")},
-                                            {dataElement:"U5ObMxm5NK8",value: get(d,"U5ObMxm5NK8")},
-                                            {dataElement:"UdE4lSfvq3g",value: get(d,"UdE4lSfvq3g")},
-                                            {dataElement:"FlgUIrpzdAk",value: get(d,"FlgUIrpzdAk")},
-                                            {dataElement:"llmn6FOCToG",value: get(d,"llmn6FOCToG")},
-                                            {dataElement:"gc5xwL8Iov7",value: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd')},
-                                            {dataElement:"XRg8WWy75xH",value: format(get(d,"XRg8WWy75xH"),'yyyy-MM-dd')},
-                                            {dataElement:"ItA7s4eRtgD",value: get(d,"ItA7s4eRtgD")},
-                                            {dataElement:"n3E7I8XIsGW",value: get(d,"n3E7I8XIsGW")},
-                                            {dataElement:"YOIw7kXDTCB",value: get(d,"YOIw7kXDTCB")},
-                                            {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
-                                            {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
-                                            {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
-                                            {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
-
-                                        ]?.filter((v)=>v?.value)
-                                    }
-                                ]
-        
-        
-                            }
-                        ]
-                    })
-                }
+                                    ]?.filter((v)=>v?.value)
+                                }
+                            ]       
+    
+                        }
+                    ]
+                })
             }
             else{
-                return undefined
+                return ({
+                    //trackedEntity: "BNlcySayK3E",
+                    trackedEntityType: "WbDGDKGBjKh",
+                    orgUnit: orgUnit.id,
+                    createdAt: format(new Date(),'yyyy-MM-dd'),
+                    enrollments:[
+                        {
+                            occurredAt: format(new Date(),'yyyy-MM-dd'),
+                            orgUnit: orgUnit.id,
+                            program: "jxMMKP58LC4",
+                            status: "ACTIVE",
+                            trackedEntityType: "WbDGDKGBjKh",
+                            enrolledAt: format(new Date(),'yyyy-MM-dd'),
+                            attributes:[
+                                {attribute:"zpbuh92IZv5",value: get(d,"zpbuh92IZv5")},
+                                {attribute:"PnTyfCzi21U",value: get(d,"PnTyfCzi21U")},
+                                {attribute:"SQ1xgm6PPJA",value: get(d,"SQ1xgm6PPJA")},
+                                {attribute:"liQTjxYq72E",value: get(d,"liQTjxYq72E")},
+                                {attribute:"fe1F4nvTxPX",value: get(d,"fe1F4nvTxPX")},
+                                {attribute:"jKpfUlsauCD",value: ppOrgUnit?.id },
+                                {attribute:"lXstk077AsZ",value: orgUnit?.id},
+                                {attribute:"EpxTg68OtYJ",value: get(d,"EpxTg68OtYJ")},
+                                {attribute:"TwqvBE6IVxN",value: get(d,"TwqvBE6IVxN")},
+                                {attribute:"uE16E2Rnx16",value: get(d,"uE16E2Rnx16")},
+                                {attribute:"B4mCRObggzm",value: get(d,"B4mCRObggzm")},
+                                {attribute:"JvQcAg9kiUH",value: get(d,"JvQcAg9kiUH")},
+                                {attribute:"EIwXld7Sc9o",value: get(d,"EIwXld7Sc9o")},
+                                {attribute:"M2mQBNAhYwW",value: get(d,"M2mQBNAhYwW")},
+                                {attribute:"pOKzZubB27Y",value: get(d,"pOKzZubB27Y")},
+                                {attribute:"InTacvgZhpW",value: get(d,"InTacvgZhpW")}
+                            ]?.filter((v)=>v?.value),
+                            events:[
+                                {
+                                    occurredAt: format(new Date(),'yyyy-MM-dd'),
+                                    orgUnit: orgUnit.id,
+                                    program: "jxMMKP58LC4",
+                                    programStage: "pjs7MjdYttv",
+                                    status: "COMPLETED",
+                                    trackedEntityType: "WbDGDKGBjKh",
+                                    enrolledAt: format(new Date(),'yyyy-MM-dd'),
+                                    enrollmentStatus: "ACTIVE",
+                                    dataValues:[
+                                        {dataElement:"NbY39IsysW8",value: get(d,"NbY39IsysW8")},
+                                        {dataElement:"ZbV6b9nyjEA",value: get(d,"ZbV6b9nyjEA")},
+                                        {dataElement:"zPurCMBL0Nu",value: get(d,"zPurCMBL0Nu")},
+                                        {dataElement:"RhvGRpZugO3",value: get(d,"RhvGRpZugO3")},
+                                        {dataElement:"OjJycXuMuZk",value: get(d,"OjJycXuMuZk")},
+                                        {dataElement:"GvmIaOBA03d",value: get(d,"GvmIaOBA03d")},
+                                        {dataElement:"lUy2eqH1sEJ",value: get(d,"lUy2eqH1sEJ")},
+                                        {dataElement:"KzMfUxbeFzD",value: get(d,"KzMfUxbeFzD")},
+                                        {dataElement:"Cy318oojbdQ",value: get(d,"Cy318oojbdQ")},
+                                        {dataElement:"fcu3uzzjyKs",value: get(d,"fcu3uzzjyKs")},
+                                        {dataElement:"PRGOGappybO",value: get(d,"PRGOGappybO")},
+                                        {dataElement:"MecFf6Wq7LR",value: epOrgUnit?.id},
+                                        {dataElement:"n0ShOa0FxbX",value: edOrgUnit?.id},
+                                        {dataElement:"iagm7CqAJJh",value: get(d,"iagm7CqAJJh")},
+                                        {dataElement:"rl6qyAcUs38",value: get(d,"rl6qyAcUs38")},
+                                        {dataElement:"Vage2qvHXd0",value: get(d,"Vage2qvHXd0")},
+                                        {dataElement:"TFC0Rw839uT",value: get(d,"TFC0Rw839uT")},
+                                        {dataElement:"vzTfKRtECRq",value: get(d,"vzTfKRtECRq")},
+                                        {dataElement:"VEP9Sw6YF8n",value: get(d,"VEP9Sw6YF8n")},
+                                        {dataElement:"LQtnBdLYXpt",value: get(d,"LQtnBdLYXpt")},
+                                        {dataElement:"c0AabYVBn3m",value: get(d,"c0AabYVBn3m")},
+                                        {dataElement:"U5ObMxm5NK8",value: get(d,"U5ObMxm5NK8")},
+                                        {dataElement:"UdE4lSfvq3g",value: get(d,"UdE4lSfvq3g")},
+                                        {dataElement:"FlgUIrpzdAk",value: get(d,"FlgUIrpzdAk")?.split(",")?.map((t)=>t?.trim())?.join(",")},
+                                        {dataElement:"llmn6FOCToG",value: get(d,"llmn6FOCToG")?.split(",")?.map((t)=>t?.trim())?.join(",")},
+                                        {dataElement:"gc5xwL8Iov7",value: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd')},
+                                        {dataElement:"XRg8WWy75xH",value: format(get(d,"XRg8WWy75xH"),'yyyy-MM-dd')},
+                                        {dataElement:"ItA7s4eRtgD",value: get(d,"ItA7s4eRtgD")},
+                                        {dataElement:"n3E7I8XIsGW",value: get(d,"n3E7I8XIsGW")},
+                                        {dataElement:"YOIw7kXDTCB",value: get(d,"YOIw7kXDTCB")},
+                                        {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
+                                        {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
+                                        {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
+                                        {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
+
+                                    ]?.filter((v)=>v?.value)
+                                }
+                            ]
+    
+    
+                        }
+                    ]
+                })
             }
-        }).filter(String).filter(Boolean)
-    })
+        }
+        else{
+            return undefined
+        }
+    }).filter(String).filter(Boolean)
 }
 
 /**
