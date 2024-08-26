@@ -5,7 +5,8 @@ import { Container } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { getUserGroup, hasAccessToRoute, hasUserGroup, useCurrentUser, UserContext } from './utils';
-import { CircularLoader } from '@dhis2/ui';
+import { CircularLoader,HeaderBar } from '@dhis2/ui';
+import { CustomDataProvider } from '@dhis2/app-runtime'
 
 
 const sidebar = css({
@@ -69,6 +70,9 @@ export const AppRoutes = () => {
       }}>
          
         <div css ={ root }>
+            <CustomDataProvider data={customData(data)}>
+                <HeaderBar appName="Manage Data for DATIM" />
+            </CustomDataProvider>
             <NavTabs
               options= { links }
               css={sidebar}
@@ -84,3 +88,49 @@ export const AppRoutes = () => {
 };
 
 export default AppRoutes;
+
+export const customData = (user)=>({
+  'systemSettings/helpPageLink': {
+      helpPageLink: '//custom-help-page-link',
+  },
+  me: {
+      ...user,
+  },
+  'action::menu/getModules': {
+      modules: [
+          {
+              name: 'dhis-web-dashboard',
+              namespace: '/dhis-web-dashboard',
+              defaultAction: '../dhis-web-dashboard/index.action',
+              displayName: 'Dashboard',
+              icon: '../icons/dhis-web-dashboard.png',
+              description: '',
+          },
+          {
+              name: 'dhis-web-data-visualizer',
+              namespace: '/dhis-web-data-visualizer',
+              defaultAction: '../dhis-web-data-visualizer/index.action',
+              displayName: 'Data Visualizer',
+              icon: '../icons/dhis-web-data-visualizer.png',
+              description: '',
+          },
+          {
+              name: 'dhis-web-capture',
+              namespace: '/dhis-web-capture',
+              defaultAction: '../dhis-web-capture/index.action',
+              displayName: 'Capture',
+              icon: '../icons/dhis-web-capture.png',
+              description: '',
+          },
+          {
+              name: 'dhis-web-maps',
+              namespace: '/dhis-web-maps',
+              defaultAction: '../dhis-web-maps/index.action',
+              displayName: 'Maps',
+              icon: '../icons/dhis-web-maps.png',
+              description: '',
+          }
+      ],
+  }
+})
+

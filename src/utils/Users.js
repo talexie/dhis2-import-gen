@@ -7,7 +7,7 @@ import isEmpty from 'lodash/isEmpty';
  */
 export const useCurrentUser = ()=>{
     const { data, isLoading } = useQuery({
-        queryKey:[`me?fields=id,username,userGroups[id,name,code],dataViewOrganisationUnits[level]`],
+        queryKey:[`me?fields=*,id,username,userGroups[id,name,code],dataViewOrganisationUnits[level],authorities`],
         refetchOnWindowFocus: false
     });
     return {

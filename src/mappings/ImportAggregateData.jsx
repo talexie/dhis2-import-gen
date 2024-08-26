@@ -12,6 +12,7 @@ import isEmpty from 'lodash/isEmpty';
 import chunk from 'lodash/chunk';
 import uniq from 'lodash/uniq';
 import { trainingMap } from '../ExcelConverterWorker';
+import { DataTable,TableHead,DataTableRow,DataTableCell, DataTableColumnHeader, TableBody } from '@dhis2/ui';
 
 const columns = [
   { key: 'dataElement', name: 'Data Element', resizable: true, sortable: true},
@@ -102,6 +103,26 @@ export const getGridColumns = (data=[],type)=>{
     return columns;
 
 }
+
+export const getTaskApi =(type,messageJobType,taskId)=>{
+    if(type === 'TRACKER_DATA'){
+        return `tracker/jobs/${taskId}`;
+    }
+    else{
+        return `system/taskSummaries/${messageJobType}/${taskId}`;
+    }
+
+}
+
+export const isTaskDone =(type,messageJobType,taskId)=>{
+    if(type === 'TRACKER_DATA'){
+        return !!taskId;
+    }
+    else{
+        return !!taskId && !!messageJobType;
+    }
+
+}
 export const ImportAggregateData = () => {   
      /* the component state is an HTML string */
     const [__html, setHtml] = useState("");
@@ -136,8 +157,8 @@ export const ImportAggregateData = () => {
         }
     });
     const { data:summaries, isLoading: summaryCompleted } = useQuery({ 
-        queryKey: [`system/taskSummaries/${message?.jobType}/${taskId}`],
-        enabled: !!taskId && !!message?.jobType && taskCompleted
+        queryKey: [getTaskApi(type,message?.jobType,taskId)],
+        enabled: isTaskDone(type,message?.jobType,taskId) && taskCompleted
     });
     const { data:fetchOrgUnits, isLoading: fetchOrgUnitsLoading } = useQuery({ 
         queryKey: [`organisationUnits?fields=id,name,code,shortName&filter=shortName:in:[${ orgUnits?.join(',')}]`],
@@ -217,8 +238,8 @@ export const ImportAggregateData = () => {
 
     useEffect(()=>{
         const observer = new QueryObserver(queryClient, { 
-            queryKey: [`system/tasks/${message?.jobType}/${taskId}`],
-            enabled: !!taskId && !!message?.jobType && !taskCompleted,
+            queryKey: [getTaskApi(type,message?.jobType,taskId)],
+            enabled: isTaskDone(type,message?.jobType,taskId) && !taskCompleted,
             refetchInterval: ()=>{
                 if(taskCompleted) {
                     return false;
@@ -230,13 +251,18 @@ export const ImportAggregateData = () => {
         })
     
         const unsubscribe = observer.subscribe(result => {
-            setTasks(result?.data?.reverse()??[]);
-            //unsubscribe()
+            if(type){
+                setTasks(result?.data??[]);
+            }
+            else{
+                setTasks(result?.data?.reverse()??[]);
+            }
+            
         })
         return ()=>{
             unsubscribe();
         }
-    },[taskId,message?.jobType,queryClient,taskCompleted]);
+    },[taskId,message?.jobType,queryClient,taskCompleted, type]);
 
     useEffect(()=>{
         if(hasTaskCompleted(tasks) && !summaryCompleted){
@@ -253,12 +279,14 @@ export const ImportAggregateData = () => {
             setOuChecked(true);
         }
     },[fetchOrgUnitsLoading,validated,fetchOrgUnits?.organisationUnits]);
+
     useEffect(()=>{
         if(!fetchEventsLoading && validated){
             setDsEvents(fetchEvents?.trackedEntities);
             setEvChecked(true);
         }
     },[fetchEventsLoading, validated,fetchEvents?.trackedEntities]);
+
     return (
         <Container css={ classes.root }>
             {
@@ -289,19 +317,28 @@ export const ImportAggregateData = () => {
                             
                             !isEmpty(tasks) && (
                                 <Stack spacing= {2} alignItems={ 'flex-start'}>
-                                    {
-                                        tasks?.map((t,i)=>(
-                                        <>
-                                            <Divider/>
-                                            <Stack spacing={1} direction='row'>
-                                                <div key={`task-${i}-${t.id}-id`}>{t?.id}</div>
-                                                <div key={`task-${i}-${t.id}-category`}>{t?.category}</div>
-                                                <div key={`task-${i}-${t.id}-level`}>{t?.level}</div>
-                                                <div key={`task-${i}-${t.id}-message`}>{t?.message}</div>
-                                            </Stack>
-                                        </>
-                                        ))
-                                    }
+                                    <DataTable>
+                                        <TableHead>
+                                            <DataTableRow>
+                                                <DataTableColumnHeader>ID</DataTableColumnHeader>
+                                                <DataTableColumnHeader>Task</DataTableColumnHeader>
+                                                <DataTableColumnHeader>Level</DataTableColumnHeader>
+                                                <DataTableColumnHeader>Message</DataTableColumnHeader>
+                                            </DataTableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {
+                                                tasks?.map((t,i)=>(
+                                                    <DataTableRow key={`task-${i}-${t.id}-id`}>
+                                                        <DataTableCell>{t?.id}</DataTableCell>
+                                                        <DataTableCell>{t?.category}</DataTableCell>
+                                                        <DataTableCell>{t?.level}</DataTableCell>
+                                                        <DataTableCell>{t?.message}</DataTableCell>
+                                                    </DataTableRow>
+                                                ))
+                                            }
+                                        </TableBody>
+                                    </DataTable>
                                 </Stack>
                             )
                         }                                 
