@@ -5,6 +5,7 @@ import { css } from '@emotion/react';
 import { createMoreColumns } from "../utils";
 import { useQuery } from 'react-query';
 import { CircularLoader } from '@dhis2/ui';
+import { defaultQueryFn } from '../App';
 
 const classes ={
     root: css({
@@ -19,7 +20,10 @@ const classes ={
 const tsDataStore = ['dataStore/frs/zm'];
 
 export const ManageOrgUnitMapping = () => {    
-    const { data,error,isLoading } = useQuery(tsDataStore);
+    const { data,error,isLoading } = useQuery({
+        queryKey: tsDataStore,
+        queryFn: defaultQueryFn
+    });
     const keys = ['dhis2Id','dhis2Code','dhis2Name','datimId','datimCode','datimName','zpctCode','zpctName'];
     const columns = createMoreColumns([],keys);
     return (

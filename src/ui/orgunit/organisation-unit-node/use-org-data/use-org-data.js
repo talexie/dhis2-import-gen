@@ -1,4 +1,5 @@
 import { useQuery } from 'react-query';
+import { defaultQueryFn } from '../../../../App';
 
 const ORG_DATA_QUERY = {
     orgUnit: {
@@ -28,7 +29,9 @@ export const useOrgData = (id, { displayName, isUserDataViewFallback }) => {
         isLoading:loading,
         error,
         data = {},
-    } = useQuery(url, {
+    } = useQuery( {
+        queryKey: url,
+        queryFn: defaultQueryFn,
         enabled: (url !== false)
     })
 

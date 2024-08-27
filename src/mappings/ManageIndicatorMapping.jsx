@@ -5,6 +5,7 @@ import { css } from '@emotion/react';
 import { createMoreColumns } from "../utils";
 import { useQuery } from 'react-query';
 import { CircularLoader } from '@dhis2/ui';
+import { defaultQueryFn } from '../App';
 //import i18n from '@dhis2/d2-i18n';
 
 const classes={
@@ -19,7 +20,10 @@ const classes={
 
 const tsDataStore = ['dataStore/terminology/mappings'];
 export const ManageIndicatorMapping = () => {    
-    const { data,isLoading,error } = useQuery(tsDataStore);
+    const { data,isLoading,error } = useQuery({
+        queryKey: tsDataStore,
+        queryFn: defaultQueryFn
+    });
     const keys = ['datimCode','datimUid','sex','ageGroup','datimXyz','hivStat','datimDisaggregationUid','datimDisaggregation','echoIndicatorUid','echoIndicatorName','echoSexUid','echoAgeGroupUid','lessThan15AndAbove15Uid','defaultUid','frequency','FY21','FY22'];
     const columns = createMoreColumns(['id'],keys);
     return (

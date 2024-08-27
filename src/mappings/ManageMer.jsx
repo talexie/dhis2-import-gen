@@ -10,6 +10,7 @@ import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import DataGrid from 'react-data-grid';
 import { useQuery, useQueryClient, useMutation } from 'react-query';
+import { defaultQueryFn } from '../App';
 
 const style = css({
     
@@ -105,10 +106,12 @@ export const ManageMer = () => {
     const { organisationUnitId, handleOrganisationUnitChange} = useOrgUnit();
     const { data: smartcare, isLoading } = useQuery({
         queryKey: ['dataStore/terminology/smartcare'],
+        queryFn: defaultQueryFn,
         enabled: !isValidating
     });
     const { data: legacyGroup, isLoading:isLegacyGroupLoading } = useQuery({
         queryKey: [`organisationUnits/${selected}&fields:organisationUnitGroups[id,name,code]`],
+        queryFn: defaultQueryFn,
         enabled: !selected
     });
     const { mutate, isLoading:posting } = useMutation(postData, {

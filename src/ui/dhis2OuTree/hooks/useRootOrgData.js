@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { patchMissingDisplayName } from '../util';
 import { useQuery } from 'react-query';
 import isEmpty from 'lodash/isEmpty';
+import { defaultQueryFn } from '../../../App';
 
 export const createRootQuery = (ids) =>
     ids.reduce(
@@ -30,7 +31,9 @@ export const useRootOrgData = (ids, { isUserDataViewFallback } = {}) => {
     const query = createRootQuery(ids);
     const filterQuery = Object.keys(query);
     const url = !isEmpty(filterQuery)?[`organisationUnits?filter=id:in:[${filterQuery?.join(',')}]&isUserDataViewFallback=${ isUserDataViewFallback??true}&paging=false&fields=path,id,displayName,level,parent[name]`]:false;
-    const rootOrgUnits = useQuery(url, {
+    const rootOrgUnits = useQuery({
+        queryKey: url,
+        queryFn: defaultQueryFn,
         enabled: (url !== false)
     })
     const { isLoading:loading, error, data, refetch } = rootOrgUnits

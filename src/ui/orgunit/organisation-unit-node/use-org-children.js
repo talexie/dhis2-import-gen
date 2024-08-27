@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useRef } from 'react'
 import { useQuery } from 'react-query'
 import { sortNodeChildrenAlphabetically } from '../helpers'
+import { defaultQueryFn } from '../../../App'
 
 const ORG_DATA_QUERY = {
     orgUnit: {
@@ -26,7 +27,9 @@ export const useOrgChildren = ({
 }) => {
     const onCompleteCalledRef = useRef(false)
     const url = node.id?[`organisationUnits/${node.id}?paging=false&fields=children[id,path,displayName]`]:false;
-    const { isFetched:called, isLoading:loading, error, data } = useQuery(url, {
+    const { isFetched:called, isLoading:loading, error, data } = useQuery( {
+        queryKey: url,
+        queryFn: defaultQueryFn,
         enabled: (url !== false)
     })
 

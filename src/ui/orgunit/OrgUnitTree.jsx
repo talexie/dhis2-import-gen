@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery } from 'react-query';
 import queryString from 'query-string';
 import { css } from '@emotion/react';
+import { defaultQueryFn } from '../../App';
 
 const classes={
     wrapper: css({
@@ -38,14 +39,21 @@ const query = {
 }
 
 export const useUserOrganisationUnits = () => {
-    const { isLoading, data, error } = useQuery([`${query.data.resource}?${queryString.stringify(query.data.params)}`])
+    const { isLoading, data, error } = useQuery({
+        queryKey: [`${query.data.resource}?${queryString.stringify(query.data.params)}`],
+        queryFn: defaultQueryFn
+    })
     
     const {
         isLoading: loadingAll,
         data: dataAll,
         error: errorAll,
         refetch,
-    } = useQuery([`${allRootQuery.allRoots.resource}?${queryString.stringify(allRootQuery.allRoots.params)}`], { lazy: true })
+    } = useQuery({ 
+        queryKey: [`${allRootQuery.allRoots.resource}?${queryString.stringify(allRootQuery.allRoots.params)}`],
+        queryFn: defaultQueryFn,
+         lazy: true 
+        })
     useEffect(() => {
         if (!data?.organisationUnits.length && data?.authorities.includes('ALL')) 
         {

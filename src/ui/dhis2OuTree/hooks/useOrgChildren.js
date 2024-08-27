@@ -3,6 +3,7 @@ import {
     sortNodeChildrenAlphabetically 
 } from '../util';
 import { useQuery } from 'react-query';
+import { defaultQueryFn } from '../../../App';
 
 /**
  * @param {string[]} ids
@@ -18,7 +19,9 @@ export const useOrgChildren = ({
 }) => {
     const onCompleteCalledRef = useRef(false)
     const url = node.id?[`organisationUnits/${node.id}?paging=false&fields=children[id,path,displayName,level],parent[name]`]:false;
-    const { isLoading:loading, error, data } = useQuery(url, {
+    const { isLoading:loading, error, data } = useQuery( {
+        queryKey: url,
+        queryFn: defaultQueryFn,
         enabled: (url !== false)
     })
 

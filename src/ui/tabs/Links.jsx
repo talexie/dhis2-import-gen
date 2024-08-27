@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { css } from '@emotion/react';
 import { useUser } from '../../utils';
+import { Stack } from '@mui/material';
 
 const navroot =css({
     position: 'relative',
@@ -64,12 +65,11 @@ export const NavTabs =({ options })=>{
     const restrictedTabs = options?.filter((o)=>o?.userGroup === 'RESTRICTED_APP_ACCESS');
     const tabs = userRestricted?.restricted && !userRestricted?.isAdmin?restrictedTabs:options;
     return(
-        <nav css={navroot}>
-            <ul css={navul }>
+        <Stack spacing={2}>
             { 
                 tabs?.map( (option,i) =>{
                     return(
-                        <li css={ navlink }>
+                        <li key={`nav-${i}`} css={ navlink }>
                             <CustomLink
                                 key = { `route-${option?.path}-${option.label}-${i}` }
                                 to={ option?.path }
@@ -79,8 +79,7 @@ export const NavTabs =({ options })=>{
                     )
                 })
             }
-            </ul>
-        </nav>
+        </Stack>
     )
 }
 

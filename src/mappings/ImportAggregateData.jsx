@@ -13,6 +13,8 @@ import chunk from 'lodash/chunk';
 import uniq from 'lodash/uniq';
 import { trainingMap } from '../ExcelConverterWorker';
 import { DataTable,TableHead,DataTableRow,DataTableCell, DataTableColumnHeader, TableBody } from '@dhis2/ui';
+import { defaultQueryFn } from '../App';
+
 
 const columns = [
   { key: 'dataElement', name: 'Data Element', resizable: true, sortable: true},
@@ -109,7 +111,7 @@ export const getTaskApi =(type,messageJobType,taskId)=>{
         return `tracker/jobs/${taskId}`;
     }
     else{
-        return `system/taskSummaries/${messageJobType}/${taskId}`;
+        return `system/tasks/${messageJobType}/${taskId}`;
     }
 
 }
@@ -158,18 +160,22 @@ export const ImportAggregateData = () => {
     });
     const { data:summaries, isLoading: summaryCompleted } = useQuery({ 
         queryKey: [getTaskApi(type,message?.jobType,taskId)],
+        queryFn: defaultQueryFn,
         enabled: isTaskDone(type,message?.jobType,taskId) && taskCompleted
     });
     const { data:fetchOrgUnits, isLoading: fetchOrgUnitsLoading } = useQuery({ 
         queryKey: [`organisationUnits?fields=id,name,code,shortName&filter=shortName:in:[${ orgUnits?.join(',')}]`],
+        queryFn: defaultQueryFn,
         enabled: !isEmpty(orgUnits) && validated && !ouChecked
     });
     /*const { data:fetchEvents, isLoading: fetchEventsLoading } = useQueries(events?.map((event)=>({ 
         queryKey: [`tracker/trackedEntities.json?program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=*,!relationships,!programOwners,!createdBy,!updatedBy`],
+        queryFn: defaultQueryFn,
         enabled: !isEmpty(events) && validated && !evChecked
     })));*/
     const { data:fetchEvents, isLoading: fetchEventsLoading } = useQuery({ 
         queryKey: [`tracker/trackedEntities.json?paging=false&program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ events?.join(';')}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,occuredAt,enrolledAt,program,events[dataValues[event,dataElement,value]]],!relationships,!programOwners,!createdBy,!updatedBy`],
+        queryFn: defaultQueryFn,
         enabled: !isEmpty(events) && validated && !evChecked
     });
 
@@ -239,6 +245,7 @@ export const ImportAggregateData = () => {
     useEffect(()=>{
         const observer = new QueryObserver(queryClient, { 
             queryKey: [getTaskApi(type,message?.jobType,taskId)],
+            queryFn: defaultQueryFn,
             enabled: isTaskDone(type,message?.jobType,taskId) && !taskCompleted,
             refetchInterval: ()=>{
                 if(taskCompleted) {
@@ -257,7 +264,6 @@ export const ImportAggregateData = () => {
             else{
                 setTasks(result?.data?.reverse()??[]);
             }
-            
         })
         return ()=>{
             unsubscribe();
@@ -286,7 +292,6 @@ export const ImportAggregateData = () => {
             setEvChecked(true);
         }
     },[fetchEventsLoading, validated,fetchEvents?.trackedEntities]);
-
     return (
         <Container css={ classes.root }>
             {

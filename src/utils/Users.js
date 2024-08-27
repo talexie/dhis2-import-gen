@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import isEmpty from 'lodash/isEmpty';
+import { defaultQueryFn } from "../App";
 
 /**
  * Get User Hook
@@ -7,7 +8,8 @@ import isEmpty from 'lodash/isEmpty';
  */
 export const useCurrentUser = ()=>{
     const { data, isLoading } = useQuery({
-        queryKey:[`me?fields=*,id,username,userGroups[id,name,code],dataViewOrganisationUnits[level],authorities`],
+        queryKey:[`me?fields=id,username,userGroups[id,name,code],dataViewOrganisationUnits[level],authorities`],
+        queryFn: defaultQueryFn,
         refetchOnWindowFocus: false
     });
     return {

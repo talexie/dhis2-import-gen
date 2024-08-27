@@ -26,7 +26,7 @@ import { PageError } from './PageError';
 import { Home } from './ui';
 
   
-const defaultQueryFn = async ({ queryKey }) => {
+export const defaultQueryFn = async ({ queryKey }) => {
     const response = await fetch(`../../${queryKey}`);
     if (!response.ok) {
         throw new Error('Network response was not ok')

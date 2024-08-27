@@ -9,7 +9,8 @@
     "dev:clean": "yarn run dev --force"
   },
   "dependencies": {
-    "@dhis2/app-runtime": "^3.8.0",
+    "@dhis2/app-adapter": "^11.7.0",
+    "@dhis2/app-runtime": "^3.10.6",
     "@dhis2/d2-i18n": "^1.1.0",
     "@dhis2/prop-types": "^3.1.2",
     "@dhis2/ui": "^8.7.7",
@@ -29,6 +30,7 @@
     "clsx": "^1.2.1",
     "dataframe-js": "^1.4.4",
     "date-fns": "^2.29.3",
+    "events": "^3.3.0",
     "file-saver": "^2.0.5",
     "formik": "^2.2.9",
     "jszip": "^3.10.1",
@@ -39,7 +41,7 @@
     "react": "^18.2.0",
     "react-data-grid": "^7.0.0-beta.26",
     "react-dom": "^18.2.0",
-    "react-query": "^3.39.2",
+    "react-query": "^3.39.3",
     "react-router-dom": "^6.7.0",
     "save-as": "^0.1.8",
     "styled-jsx": "^5.1.1",
@@ -76,6 +78,7 @@
   },
   "resolutions": {
     "get-func-name": ">=2.0.1",
-    "@adobe/css-tools": ">=4.3.2"
+    "@adobe/css-tools": ">=4.3.2",
+    "react-query": "3.39.3"
   }
 }

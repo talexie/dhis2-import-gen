@@ -31,21 +31,18 @@
       content="Manage Data for DATIM App"
       data-react-helmet="true"
     >
-    <meta
-      property="og:url"
-      content="https://react-pwa.surenatoyan.com/"
-      data-react-helmet="true"
-    >
-    <meta
-      property="og:image"
-      content="https://react-pwa.surenatoyan.com/cover.png"
-      data-react-helmet="true"
+    <!-- Injection point for base URL from backend -->
+    <meta name="dhis2-base-url" content="__DHIS2_BASE_URL__" />
+    <!--
+        manifest.json provides metadata used when your web app is installed on a
+        user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link
+        rel="manifest"
+        crossorigin="use-credentials"
+        href="/manifest.webapp"
     />
-    <meta
-      name="twitter:card"
-      content="summary"
-      data-react-helmet="true"
-    />
+    <meta name="msapplication-config" content="browserconfig.xml" />
     <!--link
       rel="stylesheet"
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
