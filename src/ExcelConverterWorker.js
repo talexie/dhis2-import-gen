@@ -1,7 +1,7 @@
 import { read, utils, write } from 'xlsx';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
-import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge, nativeSepLabels,nativeRenameLabels, nativeAddLabels, toValue } from './utils';
+import { aiGetDataFrame, nativeAddLabelValue, nativeDropLabels, nativeMerge,nativeRenameLabels, nativeAddLabels, toValue } from './utils';
 import { format } from 'date-fns';
 import concat from 'lodash/concat';
 
@@ -59,10 +59,10 @@ export const trainingMap = [
     
 ];
 export const createDhis2Import =(file)=>{
-    const wb = read(file);
+    const wb = read(file,{ cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const dataWs = getMergeValue(ws);
-    const data = utils.sheet_to_json(dataWs, { header: "A"});
+    const data = utils.sheet_to_json(dataWs, { header: "A" });
     const tblData = utils.sheet_to_html(ws);
     return {
         data: data,
@@ -311,10 +311,10 @@ export const getTxSum =(data,period)=>{
 }
 
 export const uploadMapping = (file, type)=>{
-    const wb = read(file);
+    const wb = read(file,{ cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const dataWs = getMergeValue(ws);
-    const data = utils.sheet_to_json(dataWs,{ defval:""});
+    const data = utils.sheet_to_json(dataWs,{ defval:"" });
     if(type  ==="LOCATION"){
         const renameLocationData = nativeRenameLabels(data,[]);
         return renameLocationData;
@@ -401,7 +401,7 @@ export const uploadART = (orgUnit,fileId)=>{
  * @returns 
  */
 export const getUploadFile = (file)=>{
-    const wb = read(file);
+    const wb = read(file,{ cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const dataWs = getMergeValue(ws);
     const data = utils.sheet_to_json(dataWs, { header: "A"});
@@ -475,10 +475,6 @@ export const getElementByProperty =(data,property='code')=>{
  */
 export const createTrackerDataFile=(data=[])=>{
     const renamedData = nativeRenameLabels(data,trainingMap);
-    // Merge with OrgUnits,
-    //const mergeWithOrgUnits = nativeMerge(renamedData,orgUnits,['id'])
-    // Merge with Events
-    //const mergeWithEvents= nativeMerge(mergeWithOrgUnits,events)
     return renamedData;
 }
 export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
@@ -675,7 +671,7 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
  * @returns 
  */
 export const getUploadedDataFile = (file)=>{
-    const wb = read(file);
+    const wb = read(file,{ cellDates: true, dateNF: 'yyyy-mm-dd' });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const dataWs = getMergeValue(ws);
     const data = utils.sheet_to_json(dataWs);
@@ -690,7 +686,6 @@ export const getUploadedDataFile = (file)=>{
  */
 export const getUploadedData = (data,type,attribute)=>{
     if(type ==='TRACKER_DATA'){
-        //return nativeSepLabels(data,false);
         return data;
     }
     else{
@@ -748,6 +743,7 @@ export const getUploadedData = (data,type,attribute)=>{
 export const reviewDhis2Import =(data)=>{   
     /* create workbook and display HTML */
     const wb = utils.book_new();
+    console.log("DF:",data)
     const ws = utils.json_to_sheet(data);
     utils.book_append_sheet(wb, ws, "HMIS Data"); 
     const worksheet = wb.Sheets[wb.SheetNames[0]];   

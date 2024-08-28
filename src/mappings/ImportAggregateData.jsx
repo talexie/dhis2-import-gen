@@ -11,9 +11,11 @@ import { useQueryClient, useMutation, QueryObserver, useQuery, useQueries } from
 import isEmpty from 'lodash/isEmpty';
 import chunk from 'lodash/chunk';
 import uniq from 'lodash/uniq';
+import get from 'lodash/get';
 import { trainingMap } from '../ExcelConverterWorker';
 import { DataTable,TableHead,DataTableRow,DataTableCell, DataTableColumnHeader, TableBody } from '@dhis2/ui';
 import { defaultQueryFn } from '../App';
+import { isDate, isValid, format } from 'date-fns';
 
 
 const columns = [
@@ -98,7 +100,33 @@ export const getGridColumns = (data=[],type)=>{
             key: m?.old, 
             name: m?.old, 
             resizable: true, 
-            sortable: true
+            sortable: true,
+            renderCell: (props)=>{
+                const { column, row } = props;
+                const value = get(row,column.key);
+                console.log("key:",column.key,"value:",value)
+                if(isValid(value) && isDate(value)){
+                    return( 
+                        <div>
+                            { format(value,'yyyy-MM-dd') }
+                        </div>
+                    )
+                }
+                else if(typeof value === 'boolean' || value instanceof Boolean){
+                    return( 
+                        <div>
+                            { value?.toString() }
+                        </div>
+                    )
+                }
+                else{
+                    return( 
+                        <div>
+                            { value }
+                        </div>
+                    )
+                }
+            }
         })
         )
     }
@@ -127,7 +155,7 @@ export const isTaskDone =(type,messageJobType,taskId)=>{
 }
 export const ImportAggregateData = () => {   
      /* the component state is an HTML string */
-    const [__html, setHtml] = useState("");
+    //const [__html, setHtml] = useState("");
     const [gridColumns, setGridColumns] = useState(columns);
     const workerFile = useWorker(createWorker);
     const queryClient = useQueryClient();
@@ -182,8 +210,10 @@ export const ImportAggregateData = () => {
     
     const reviewData=async()=>{
         // Process data
-        const fileResult = await workerFile.reviewDhis2Import(rows);
-        setHtml(fileResult); // update state
+        //const fileResult = await workerFile.reviewDhis2Import(rows);
+        //setHtml(fileResult); // update state
+        console.log("dataX:",rows)
+        console.log("gridcols:",gridColumns)
         setReviewed(true);
     }
     const confirmData =(e)=>{
