@@ -104,7 +104,6 @@ export const getGridColumns = (data=[],type)=>{
             renderCell: (props)=>{
                 const { column, row } = props;
                 const value = get(row,column.key);
-                console.log("key:",column.key,"value:",value)
                 if(isValid(value) && isDate(value)){
                     return( 
                         <div>
@@ -154,8 +153,6 @@ export const isTaskDone =(type,messageJobType,taskId)=>{
 
 }
 export const ImportAggregateData = () => {   
-     /* the component state is an HTML string */
-    //const [__html, setHtml] = useState("");
     const [gridColumns, setGridColumns] = useState(columns);
     const workerFile = useWorker(createWorker);
     const queryClient = useQueryClient();
@@ -209,11 +206,6 @@ export const ImportAggregateData = () => {
 
     
     const reviewData=async()=>{
-        // Process data
-        //const fileResult = await workerFile.reviewDhis2Import(rows);
-        //setHtml(fileResult); // update state
-        console.log("dataX:",rows)
-        console.log("gridcols:",gridColumns)
         setReviewed(true);
     }
     const confirmData =(e)=>{
@@ -224,6 +216,7 @@ export const ImportAggregateData = () => {
             if(type === 'TRACKER_DATA'){
                 const records = await workerFile.createTrackerPayload(rows,dsEvents,dsOrgUnits);
                 const mergedRecords = await workerFile.mergeRecords(records);
+                console.log("Merge:",mergedRecords)
                 mutate({
                     type: type,
                     data: {

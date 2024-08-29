@@ -187,10 +187,16 @@ export const nativeSepLabels = (data,sep=false,key={'old':" ",'new':"_"})=>{
  * @param {*} columns 
  * @returns 
  */
-export const nativeRenameLabels = (data,columns=[])=>{
-    return map(data,(d)=>{
+export const nativeRenameLabels = (data,columns=[],tracker=false)=>{
+    return map(data,(d)=>{    
         columns?.forEach((c)=>{
-            set(d,c?.new,get(d,c?.old));
+            const value = get(d,c?.old); 
+            if(tracker && (typeof value === 'boolean' || value instanceof Boolean)){
+                set(d,c?.new,value?.toString());
+            }
+            else{
+                set(d,c?.new,value);
+            }
             delete d?.[c?.old];
         });
         return d;

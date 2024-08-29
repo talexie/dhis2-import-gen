@@ -417,7 +417,7 @@ export const getUploadFile = (file)=>{
  * @returns 
  */
 export const findElementByProperty =(data=[],value="",property='code')=>{
-    return data?.find((ou)=>get(ou,property) === value);
+    return data?.find((ou)=>get(ou,property) === value?.trim());
 }
 
 /**
@@ -427,27 +427,34 @@ export const findElementByProperty =(data=[],value="",property='code')=>{
  * @returns 
  */
 export const findEntityByAttribute =(data=[],value="",property='code')=>{
-    return data?.find((e)=>e?.attributes?.some((attr)=>((attr?.attribute === property) && (attr.value === value))));
+    return data?.find((e)=>e?.attributes?.some((attr)=>((attr?.attribute === property) && (attr.value === value?.trim()))));
 }
 
 export const mergeRecords = (records,property="trackedEntity") => {
     const mergedMap = new Map();
-  
+
     records.forEach(record => {
-    
       const key =  get(record,property);
-      if (mergedMap.has(key)) {
-        const existingRecord = mergedMap.get(key);
-        existingRecord.enrollments =[
+      const te = findElementByProperty(record?.enrollments?.[0]?.attributes,'PnTyfCzi21U','attribute');
+      const keyAttr = te?.value;
+      if (mergedMap.has(keyAttr)) {
+        const existingRecord = mergedMap.get(keyAttr);
+        const mappedEvents = [...existingRecord?.enrollments?.[0].events,...record?.enrollments?.[0].events]
+        const enrollments =[
             {
                 ...existingRecord?.enrollments?.[0],
-                events: concat(existingRecord?.enrollments?.[0].events,record?.enrollments?.[0].events)
+                events: mappedEvents
             }
         ]
-        mergedMap.set(key, { ...existingRecord });
+        const mappedRecord = {
+            ...existingRecord,
+            enrollments: enrollments
+        }
+
+        mergedMap.set(keyAttr, mappedRecord);
       } 
       else {
-        mergedMap.set(key, record);
+        mergedMap.set(keyAttr,record);
       }
     });
     return Array.from(mergedMap.values());
@@ -467,27 +474,25 @@ export const getElementByProperty =(data,property='code')=>{
 }
 
 
-
 /**
  * Create Tracker Payload for importing to the system
  * @param {*} data 
  * @returns 
  */
 export const createTrackerDataFile=(data=[])=>{
-    const renamedData = nativeRenameLabels(data,trainingMap);
-    return renamedData;
+    return nativeRenameLabels(data,trainingMap,true);
 }
 export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
     const mappedData = createTrackerDataFile(data);
     return mappedData?.map((d)=>{
         const te = findEntityByAttribute(entities,d?.PnTyfCzi21U,'PnTyfCzi21U');
-        const enrollment = te?.enrollments?.[0];
         const orgUnit = findElementByProperty(orgUnits,d?.lXstk077AsZ,'shortName');
         const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName');
         const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName');
         const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName');
         if(orgUnit){
             if(te){
+                const enrollment = te?.enrollments?.[0];
                 return ({
                     trackedEntity: te?.trackedEntity,
                     trackedEntityType: te?.trackedEntityType,
@@ -521,7 +526,7 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
                             ]?.filter((v)=>v?.value),
                             events:[
                                 {
-                                    occurredAt: format(new Date(),'yyyy-MM-dd'),
+                                    occurredAt: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd'),
                                     orgUnit: te?.orgUnit,
                                     program: "jxMMKP58LC4",
                                     programStage: "pjs7MjdYttv",
@@ -573,13 +578,12 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
             }
             else{
                 return ({
-                    //trackedEntity: "BNlcySayK3E",
                     trackedEntityType: "WbDGDKGBjKh",
                     orgUnit: orgUnit.id,
                     createdAt: format(new Date(),'yyyy-MM-dd'),
                     enrollments:[
                         {
-                            occurredAt: format(new Date(),'yyyy-MM-dd'),
+                            occurredAt: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd'),
                             orgUnit: orgUnit.id,
                             program: "jxMMKP58LC4",
                             status: "ACTIVE",
@@ -605,7 +609,7 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
                             ]?.filter((v)=>v?.value),
                             events:[
                                 {
-                                    occurredAt: format(new Date(),'yyyy-MM-dd'),
+                                    occurredAt: format(get(d,"gc5xwL8Iov7"),'yyyy-MM-dd'),
                                     orgUnit: orgUnit.id,
                                     program: "jxMMKP58LC4",
                                     programStage: "pjs7MjdYttv",
