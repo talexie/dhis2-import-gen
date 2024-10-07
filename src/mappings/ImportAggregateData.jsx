@@ -193,17 +193,17 @@ export const ImportAggregateData = () => {
         queryFn: defaultQueryFn,
         enabled: !isEmpty(orgUnits) && validated && !ouChecked
     });
-    /*const { data:fetchEvents, isLoading: fetchEventsLoading } = useQueries(events?.map((event)=>({ 
-        queryKey: [`tracker/trackedEntities.json?program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=*,!relationships,!programOwners,!createdBy,!updatedBy`],
+    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQueries(events?.map((event)=>({ 
+        queryKey: [`tracker/trackedEntities.json?paging=false&program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,occuredAt,enrolledAt,program,events[dataValues[event,dataElement,value]]],!relationships,!programOwners,!createdBy,!updatedBy`],
         queryFn: defaultQueryFn,
-        enabled: !isEmpty(events) && validated && !evChecked
-    })));*/
-    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQuery({ 
+        enabled: !isEmpty(event) && validated && !evChecked
+    })));
+    /*const { data:fetchEvents, isLoading: fetchEventsLoading } = useQuery({ 
         queryKey: [`tracker/trackedEntities.json?paging=false&program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ events?.join(';')}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,occuredAt,enrolledAt,program,events[dataValues[event,dataElement,value]]],!relationships,!programOwners,!createdBy,!updatedBy`],
         queryFn: defaultQueryFn,
         enabled: !isEmpty(events) && validated && !evChecked
-    });
-
+    });*/
+    
     
     const reviewData=async()=>{
         setReviewed(true);
@@ -251,8 +251,8 @@ export const ImportAggregateData = () => {
             const validateParticipants = await workerFile.getElementByProperty(fileData,'Participant_ID');
             const validateOrgUnits = uniq([...pdOrgUnits,...epOrgUnits,...edOrgUnits,...ppOrgUnits]);
             setOrgUnits(validateOrgUnits);
-            //setEvents(chunk(uniq(validateParticipants),70));
-            setEvents(uniq(validateParticipants));
+            setEvents(chunk(uniq(validateParticipants),70));
+            //setEvents(uniq(validateParticipants));
             const sData = await workerFile.getUploadedData(fileData,type,'bdV6upF84Hd');
             setRows(sData);
             setGridColumns(getGridColumns(trainingMap,type));
