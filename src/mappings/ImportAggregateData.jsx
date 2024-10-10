@@ -12,6 +12,7 @@ import isEmpty from 'lodash/isEmpty';
 import chunk from 'lodash/chunk';
 import uniq from 'lodash/uniq';
 import get from 'lodash/get';
+import flatten from 'lodash/flatten';
 import { trainingMap } from '../ExcelConverterWorker';
 import { DataTable,TableHead,DataTableRow,DataTableCell, DataTableColumnHeader, TableBody } from '@dhis2/ui';
 import { defaultQueryFn } from '../App';
@@ -132,7 +133,15 @@ export const getGridColumns = (data=[],type)=>{
     return columns;
 
 }
-
+export const isReqsLoaded =(data,key='trackedEntities')=>{
+    const copyData = [...data];
+    return copyData?.every((d)=>(!d?.isLoading && Object.hasOwn(d?.data || {},key)));
+}
+export const consolidateQueryData =(data)=>{
+    return flatten(data?.map((q)=>{
+        return q?.data?.trackedEntities;
+    }));
+}
 export const getTaskApi =(type,messageJobType,taskId)=>{
     if(type === 'TRACKER_DATA'){
         return `tracker/jobs/${taskId}`;
@@ -193,11 +202,12 @@ export const ImportAggregateData = () => {
         queryFn: defaultQueryFn,
         enabled: !isEmpty(orgUnits) && validated && !ouChecked
     });
-    const { data:fetchEvents, isLoading: fetchEventsLoading } = useQueries(events?.map((event)=>({ 
-        queryKey: [`tracker/trackedEntities.json?paging=false&program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,occuredAt,enrolledAt,program,events[dataValues[event,dataElement,value]]],!relationships,!programOwners,!createdBy,!updatedBy`],
-        queryFn: defaultQueryFn,
-        enabled: !isEmpty(event) && validated && !evChecked
-    })));
+    const trackData = useQueries(events?.map((event)=>({ 
+            queryKey: [`tracker/trackedEntities.json?paging=false&program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ event?.join(';')}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,occuredAt,enrolledAt,program,events[dataValues[event,dataElement,value]]],!relationships,!programOwners,!createdBy,!updatedBy`],
+            queryFn: defaultQueryFn,
+            enabled: !isEmpty(event) && validated && !evChecked
+        }))
+    );
     /*const { data:fetchEvents, isLoading: fetchEventsLoading } = useQuery({ 
         queryKey: [`tracker/trackedEntities.json?paging=false&program=jxMMKP58LC4&ouMode=ACCESSIBLE&filter=PnTyfCzi21U:in:${ events?.join(';')}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,occuredAt,enrolledAt,program,events[dataValues[event,dataElement,value]]],!relationships,!programOwners,!createdBy,!updatedBy`],
         queryFn: defaultQueryFn,
@@ -216,7 +226,6 @@ export const ImportAggregateData = () => {
             if(type === 'TRACKER_DATA'){
                 const records = await workerFile.createTrackerPayload(rows,dsEvents,dsOrgUnits);
                 const mergedRecords = await workerFile.mergeRecords(records);
-                console.log("Merge:",mergedRecords)
                 mutate({
                     type: type,
                     data: {
@@ -309,12 +318,21 @@ export const ImportAggregateData = () => {
         }
     },[fetchOrgUnitsLoading,validated,fetchOrgUnits?.organisationUnits]);
 
-    useEffect(()=>{
+    /*useEffect(()=>{
         if(!fetchEventsLoading && validated){
+            console.log("1:",fetchEvents)
             setDsEvents(fetchEvents?.trackedEntities);
             setEvChecked(true);
         }
     },[fetchEventsLoading, validated,fetchEvents?.trackedEntities]);
+    */
+    useEffect(()=>{
+        if(validated && isReqsLoaded(trackData)){
+            const fetchedData = [...consolidateQueryData(trackData)];
+            setDsEvents(()=>fetchedData);
+            setEvChecked(true);
+        }
+    },[validated,trackData]);
     return (
         <Container css={ classes.root }>
             {
