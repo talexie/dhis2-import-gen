@@ -55,7 +55,8 @@ export const trainingMap = [
     {old:"Event_USAID_Type",new:"Q2XqijFJnIr"},
     {old:"Event_USAID_Domain",new:"Kfc4bffUKU2"},
     {old:"Event_USAID_Indicator",new:"cwp2WfIfxKj"},
-    {old:"Event_MOU_Type",new:"xpUsddrA1TP"}
+    {old:"Event_MOU_Type",new:"xpUsddrA1TP"},
+    {old:"Event_host",new:"Ma6dFGkAwoY"}
     
 ];
 export const createDhis2Import =(file)=>{
@@ -490,6 +491,7 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
         const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName');
         const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName');
         const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName');
+        const eHostOrgUnit = findElementByProperty(orgUnits,d?.Ma6dFGkAwoY,'shortName');
         if(orgUnit){
             if(te){
                 const enrollment = te?.enrollments?.[0];
@@ -566,7 +568,8 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
                                         {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
                                         {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
                                         {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
-                                        {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
+                                        {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")},
+                                        {dataElement:"Ma6dFGkAwoY",value: eHostOrgUnit?.id}
 
                                     ]?.filter((v)=>v?.value)
                                 }
@@ -651,7 +654,8 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
                                         {dataElement:"Q2XqijFJnIr",value: get(d,"Q2XqijFJnIr")},
                                         {dataElement:"Kfc4bffUKU2",value: get(d,"Kfc4bffUKU2")},
                                         {dataElement:"cwp2WfIfxKj",value: get(d,"cwp2WfIfxKj")},
-                                        {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")}
+                                        {dataElement:"xpUsddrA1TP",value: get(d,"xpUsddrA1TP")},
+                                        {dataElement:"Ma6dFGkAwoY",value: eHostOrgUnit?.id}
 
                                     ]?.filter((v)=>v?.value)
                                 }
@@ -747,7 +751,6 @@ export const getUploadedData = (data,type,attribute)=>{
 export const reviewDhis2Import =(data)=>{   
     /* create workbook and display HTML */
     const wb = utils.book_new();
-    console.log("DF:",data)
     const ws = utils.json_to_sheet(data);
     utils.book_append_sheet(wb, ws, "HMIS Data"); 
     const worksheet = wb.Sheets[wb.SheetNames[0]];   
