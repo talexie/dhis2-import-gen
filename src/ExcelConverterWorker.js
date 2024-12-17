@@ -417,7 +417,10 @@ export const getUploadFile = (file)=>{
  * @param {*} property defaults to 'code' 
  * @returns 
  */
-export const findElementByProperty =(data=[],value="",property='code')=>{
+export const findElementByProperty =(data=[],value="",property='code',level=undefined)=>{
+    if(level){
+        return data?.find((ou)=>((get(ou,property) === value?.trim()) && (get(ou,'level') === level)));    
+    }
     return data?.find((ou)=>get(ou,property) === value?.trim());
 }
 
@@ -487,11 +490,11 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
     const mappedData = createTrackerDataFile(data);
     return mappedData?.map((d)=>{
         const te = findEntityByAttribute(entities,d?.PnTyfCzi21U,'PnTyfCzi21U');
-        const orgUnit = findElementByProperty(orgUnits,d?.lXstk077AsZ,'shortName');
-        const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName');
-        const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName');
-        const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName');
-        const eHostOrgUnit = findElementByProperty(orgUnits,d?.Ma6dFGkAwoY,'shortName');
+        const orgUnit = findElementByProperty(orgUnits,d?.lXstk077AsZ,'shortName',5);
+        const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName',4);
+        const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName',5);
+        const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName',4);
+        const eHostOrgUnit = findElementByProperty(orgUnits,d?.Ma6dFGkAwoY,'shortName',4);
         if(orgUnit){
             if(te){
                 const enrollment = te?.enrollments?.[0];

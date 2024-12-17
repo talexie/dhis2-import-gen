@@ -198,7 +198,7 @@ export const ImportAggregateData = () => {
         enabled: isTaskDone(type,message?.jobType,taskId) && taskCompleted
     });
     const { data:fetchOrgUnits, isLoading: fetchOrgUnitsLoading } = useQuery({ 
-        queryKey: [`organisationUnits?fields=id,name,code,shortName&filter=shortName:in:[${ orgUnits?.join(',')}]`],
+        queryKey: [`organisationUnits?fields=id,name,code,shortName,level&filter=shortName:in:[${ orgUnits?.join(',')}]`],
         queryFn: defaultQueryFn,
         enabled: !isEmpty(orgUnits) && validated && !ouChecked
     });
