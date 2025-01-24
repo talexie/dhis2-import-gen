@@ -26,7 +26,7 @@ export default defineConfig({
     sourcemap: false
   },
   define: {
-    'process.env': 'import.meta.env'
+    'process.env': {}
   }
 });
 /*    /***VitePWA({

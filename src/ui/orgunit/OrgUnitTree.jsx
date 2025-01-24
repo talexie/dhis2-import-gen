@@ -7,7 +7,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery } from 'react-query';
 import queryString from 'query-string';
 import { css } from '@emotion/react';
-import { defaultQueryFn } from '../../App';
+import { defaultQueryFn } from '../../App2';
 
 const classes={
     wrapper: css({

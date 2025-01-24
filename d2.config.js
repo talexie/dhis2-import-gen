@@ -3,8 +3,9 @@ const config = {
     name: "manage-data-for-datim",
     title: "Manage Data for DATIM",
     entryPoints: {
-        app: './src/index.jsx',
+        app: './src/App.jsx',
     },
+    direction: "auto"
 }
 
 module.exports = config

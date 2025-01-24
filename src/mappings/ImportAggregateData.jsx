@@ -15,7 +15,7 @@ import get from 'lodash/get';
 import flatten from 'lodash/flatten';
 import { trainingMap } from '../ExcelConverterWorker';
 import { DataTable,TableHead,DataTableRow,DataTableCell, DataTableColumnHeader, TableBody } from '@dhis2/ui';
-import { defaultQueryFn } from '../App';
+import { defaultQueryFn } from '../App2';
 import { isDate, isValid, format } from 'date-fns';
 
 

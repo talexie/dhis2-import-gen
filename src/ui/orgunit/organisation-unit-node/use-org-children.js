@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef } from 'react'
 import { useQuery } from 'react-query'
 import { sortNodeChildrenAlphabetically } from '../helpers'
-import { defaultQueryFn } from '../../../App'
+import { defaultQueryFn } from '../../../App2'
 
 const ORG_DATA_QUERY = {
     orgUnit: {

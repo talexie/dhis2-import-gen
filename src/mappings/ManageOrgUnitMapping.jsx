@@ -5,7 +5,7 @@ import { css } from '@emotion/react';
 import { createMoreColumns } from "../utils";
 import { useQuery } from 'react-query';
 import { CircularLoader } from '@dhis2/ui';
-import { defaultQueryFn } from '../App';
+import { defaultQueryFn } from '../App2';
 
 const classes ={
     root: css({

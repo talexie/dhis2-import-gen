@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import isEmpty from 'lodash/isEmpty';
-import { defaultQueryFn } from "../App";
+import { defaultQueryFn } from "../App2";
 
 /**
  * Get User Hook

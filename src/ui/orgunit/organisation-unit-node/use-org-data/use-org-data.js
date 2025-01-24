@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query';
-import { defaultQueryFn } from '../../../../App';
+import { defaultQueryFn } from '../../../../App2';
 
 const ORG_DATA_QUERY = {
     orgUnit: {

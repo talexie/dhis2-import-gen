@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useQuery } from 'react-query'
 import { patchMissingDisplayName } from './patch-missing-display-name';
 import { isEmpty } from 'lodash';
-import { defaultQueryFn } from '../../../../App';
+import { defaultQueryFn } from '../../../../App2';
 
 export const createRootQuery = (ids) =>
     ids.reduce(

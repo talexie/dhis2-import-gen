@@ -19,11 +19,14 @@ importers:
         specifier: ^3.13.0
         version: 3.13.0(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@dhis2/d2-i18n':
-        specifier: ^1.1.0
+        specifier: ^1.1.1
         version: 1.1.3
       '@dhis2/prop-types':
         specifier: ^3.1.2
         version: 3.1.2(prop-types@15.8.1)
+      '@dhis2/pwa':
+        specifier: 12.1.0
+        version: 12.1.0
       '@dhis2/ui':
         specifier: ^10.1.10
         version: 10.1.10(@dhis2/app-runtime@3.13.0(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@dhis2/d2-i18n@1.1.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-jsx@4.0.0(@babel/core@7.26.0)(react@18.3.1))
@@ -93,6 +96,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      post-robot:
+        specifier: ^8.0.32
+        version: 8.0.32
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -5231,6 +5237,9 @@ packages:
 
   post-robot@10.0.46:
     resolution: {integrity: sha512-EgVJiuvI4iRWDZvzObWes0X/n8olWBEJWxlSw79zmhpgkigX8UsVL4VOBhVtoJKwf0Y9qP9g2zOONw1rv80QbA==}
+
+  post-robot@8.0.32:
+    resolution: {integrity: sha512-PMOdDAt3pyuKUxZcTzdcXXFxLqkdeLpRlcCQl7QAJpI+e7J1YHH+PfC7KAbcL8hRVQ1LknQYGoirbA1/eO/a1g==}
 
   postcss-calc@8.2.4:
     resolution: {integrity: sha512-SmWMSJmB8MRnnULldx0lQIyhSNvuDl9HfrZkaqqE/WHAhToYsAvDq+yAsA/kIyINDszOp3Rh0GFoNuH5Ypsm3Q==}
@@ -13126,6 +13135,12 @@ snapshots:
       cross-domain-safe-weakmap: 1.0.29
       cross-domain-utils: 2.0.38
       universal-serialize: 1.0.10
+      zalgo-promise: 1.0.48
+
+  post-robot@8.0.32:
+    dependencies:
+      cross-domain-safe-weakmap: 1.0.29
+      cross-domain-utils: 2.0.38
       zalgo-promise: 1.0.48
 
   postcss-calc@8.2.4(postcss@8.5.1):

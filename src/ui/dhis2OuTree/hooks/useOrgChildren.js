@@ -3,7 +3,7 @@ import {
     sortNodeChildrenAlphabetically 
 } from '../util';
 import { useQuery } from 'react-query';
-import { defaultQueryFn } from '../../../App';
+import { defaultQueryFn } from '../../../App2';
 
 /**
  * @param {string[]} ids

@@ -10,7 +10,7 @@ import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
 import 'react-data-grid/lib/styles.css';
 import DataGrid from 'react-data-grid';
 import { useQuery, useQueryClient, useMutation } from 'react-query';
-import { defaultQueryFn } from '../App';
+import { defaultQueryFn } from '../App2';
 
 const style = css({
     
