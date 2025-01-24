@@ -25,6 +25,9 @@ export default defineConfig({
     outDir: "build",
     sourcemap: false
   },
+  define: {
+    'process.env': 'import.meta.env'
+  }
 });
 /*    /***VitePWA({
       manifest,

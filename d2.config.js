@@ -3,7 +3,7 @@ const config = {
     name: "manage-data-for-datim",
     title: "Manage Data for DATIM",
     entryPoints: {
-        app: './src/App.js',
+        app: './src/index.jsx',
     },
 }
 

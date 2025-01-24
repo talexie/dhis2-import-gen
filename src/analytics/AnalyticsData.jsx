@@ -11,7 +11,7 @@ import {
 import chunk from 'lodash/chunk';
 import queryString from 'query-string';
 import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
-import { Container } from '@mui/system';
+import { Container } from '@mui/material';
 import { NoticeBox } from '@dhis2/ui';
 import { minBy } from 'lodash';
 

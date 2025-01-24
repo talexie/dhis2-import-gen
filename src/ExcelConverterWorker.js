@@ -492,8 +492,8 @@ export const createTrackerPayload =(data=[],entities=[],orgUnits=[])=>{
         const te = findEntityByAttribute(entities,d?.PnTyfCzi21U,'PnTyfCzi21U');
         const orgUnit = findElementByProperty(orgUnits,d?.lXstk077AsZ,'shortName',5);
         const ppOrgUnit = findElementByProperty(orgUnits,d?.jKpfUlsauCD,'shortName',4);
-        const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName',5);
-        const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName',4);
+        const epOrgUnit = findElementByProperty(orgUnits,d?.MecFf6Wq7LR,'shortName',4);
+        const edOrgUnit = findElementByProperty(orgUnits,d?.n0ShOa0FxbX,'shortName',5);
         const eHostOrgUnit = findElementByProperty(orgUnits,d?.Ma6dFGkAwoY,'shortName',4);
         if(orgUnit){
             if(te){

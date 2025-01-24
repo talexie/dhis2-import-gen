@@ -1,4 +1,4 @@
-import { Node } from '@dhis2-ui/node'
+import { Node } from '@dhis2/ui'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { leftTrimToRootId } from '../helpers'
